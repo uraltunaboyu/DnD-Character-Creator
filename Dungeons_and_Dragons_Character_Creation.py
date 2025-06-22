@@ -20,21 +20,25 @@ Created on Tuesday April 30 2019
 # It does not print class traits
 # =============================================================================
 
-import random
 import collections
+from dataclasses import dataclass, replace
+import enum
+import random
+from typing import Callable, Any
 
-def normal(min, max): # Not exactly sure how this one is working, but it gives a more realistic result for age, height and weight
-    r = round(random.triangular(low = min, high = max))# Round gives us a whole number for a character's age
+def normal(min:int, max:int) -> int: # Not exactly sure how this one is working, but it gives a more realistic result for age, height and weight
+    r: int = round(random.triangular(low = min, high = max))# Round gives us a whole number for a character's age
     return r
 
-def hitpoints(max_dice):
-    n = 1
-    hitpoints = 0
+def hitpoints(max_dice:int) -> int:
+    n: int = 1
+    hitpoints: int = 0
+    
     if level == 1:
         hitpoints = max_dice + con_mod
         if hitpoints <= max_dice:  # This makes it so that the minimum HP is your HP die but you can start stronger if it "rolls well"
             hitpoints = max_dice
-        return(hitpoints)
+        return hitpoints
     else:
         hitpoints = max_dice + level * con_mod
         while n < level:
@@ -42,26 +46,26 @@ def hitpoints(max_dice):
             n = n + 1
     if hitpoints <= max_dice + (level - 1):  # This makes it so the minimum HP increase is 1, I don't like to play with weakening characters
         hitpoints = max_dice + (level - 1)
-    return(hitpoints)
+    return hitpoints
 
-def stat_increase(stat, num_increase):
+def stat_increase(stat:int, num_increase:int) -> int:
     if stat <= 20 - num_increase:
         stat = stat + num_increase
     else:
         stat = 20
-    return(stat)
+    return stat
         
-def stat_decrease(stat, num_decrease):
+def stat_decrease(stat:int, num_decrease:int) -> int:
     if stat >= 1 + num_decrease:
         stat = stat - num_decrease
     else:
         stat = 1
-    return(stat)
+    return stat
         
-def stat_mod(stat):
+def stat_mod(stat:int) -> int:
     return (stat - 10) // 2
     
-def remove_duplicates(input):
+def remove_duplicates(input:list[str]) -> list[str]:
     return list(set(input))
 
 level = 3  # This is where you change Character Level
@@ -119,1346 +123,1119 @@ skills = ["Acrobatics", "Animal Handling", "Arcana", "Athletics", "Deception", "
 artisan_tools = ["Alchemist's Supplies", "Brewer's Supplies", "Calligrapher's Supplies", "Carpenter's Tools", "Cartographer's Tools", "Cobbler's Tools", "Cook's Utensils", "Glassblower's Tools", "Jeweler's Tools", "Leatherworker's Tools", "Mason's Tools", "Painter's Tools", "Potter's Tools", "Smith's Tools", "Tinker's Tools", "Weaver's Tools", "Woodcarver's Tools"]
 gaming_sets = ["Dice Set", "Dragonchess Set", "Playing Card Set", "Three-Dragon Ante Set"]
 musical_instruments = ["Bagpipes", "Drum", "Dulcimer", "Flute", "Lute", "Lyre", "Horn", "Pan Flute", "Shawm", "Viol"]
-martial_weapons = ["Battleaxe", "Flail", "Glaive", "Greataxe", "Greatsword", "Halberd", "Lance", "Longsword", "Maul", "Morningstar", "Pike", "Rapier", "Scimitar", "Shortsword", "Trident", "War Pick", "Warhammer", "Whip", "Blowgun", "Hand Crossbow", "Heavy Crossbow", "Longbow", "Net"]
 martial_melee = ["Battleaxe", "Flail", "Glaive", "Greataxe", "Greatsword", "Halberd", "Lance", "Longsword", "Maul", "Morningstar", "Pike", "Rapier", "Scimitar", "Shortsword", "Trident", "War Pick", "Warhammer", "Whip"]
-simple_weapons = ["Club", "Dagger", "Greatclub", "Handaxe", "Javelin", "Light Hammer", "Mace", "Quarterstaff", "Sickle", "Spear", "Light Crossbow", "Dart", "Shortbow", "Sling"]
+martial_ranged = ["Blowgun", "Hand Crossbow", "Heavy Crossbow", "Longbow", "Net"]
+martial_weapons = martial_melee + martial_ranged
 simple_melee = ["Club", "Dagger", "Greatclub", "Handaxe", "Javelin", "Light Hammer", "Mace", "Quarterstaff", "Sickle", "Spear"]
+simple_ranged = ["Light Crossbow", "Dart", "Shortbow", "Sling"]
+simple_weapons = simple_melee + simple_ranged
 
-# Abomination Currently Removed
-race = ["Aasimar", "Bugbear", "Dragonborn", "Dryad", "Dwarf", "Elf", "Firbolg", "Genasi", "Gith", "Gnome", "Goblin", "Goliath", "Hobgoblin", "Half-Elf", "Halfling", "Half-Orc", "Human", "Juiblexian", "Kender", "Kenku", "Kobold", "Lizardfolk", "Mousefolk", "Orc", "Succubus", "Tabaxi", "Tiefling", "Tortle", "Triton", "Yuan-Ti Pureblood"]
-race = random.choice(race)
+### COMMON DEFINITIONS ###
 
-if race == "Aasimar":
-    subrace = ["Fallen", "Protector", "Scourge"]
-    subrace = random.choice(subrace)
-    attr_cha = stat_increase(attr_cha, 2)
-    if subrace == "Fallen":
-        attr_str = stat_increase(attr_str, 1)
-    if subrace == "Protector":
-        attr_wis = stat_increase(attr_wis, 1)
-    if subrace == "Scourge":
-        attr_con = stat_increase(attr_con, 1)
-    age = normal(20,140)
-    size_mod = normal(2,20)
-    height = 4 * 12 + 10 + size_mod
-    weight = 110 + size_mod * normal(2,8)
-    eyes = ["Pupil-less Pale White", "Pupil-less Gold", "Pupil-less Gray", "Pupil-less Topaz"]
-    eyes = random.choice(eyes)
-    skin = ["Light/Pale White", "White/Fair", "Lightly Tanned", "Medium/Tanned", "Olive/Moderate Brown", "Brown", "Dark Brown", "Very Dark Brown/Black", "Emerald", "Gold", "Silver"]
-    skin = random.choice(skin)
-    hair = ["Red", "Blond", "Brown", "Black", "Silver"]
-    hair = random.choice(hair)
-    speed = 30
-    traits.extend(["Darkvision (60ft)", "Healing Hands", "Light Bearer"])
-    resistances.extend(["Necrotic", "Radiant"])
-    if level >= 3:
-        if subrace == "Fallen":
-            traits.extend(["Necrotic Shroud"])
-        if subrace == "Protector":
-            traits.extend(["Radiant Soul"])
-        if subrace == "Scourge":
-            traits.extend(["Radiant Consumption"])
+class DamageType(enum.StrEnum):
+    BLUDGEONING = "Bludgeoning"
+    PIERCING = "Piercing"
+    SLASHING = "Slashing"
+    ACID = "Acid"
+    COLD = "Cold"
+    FIRE = "Fire"
+    FORCE = "Force"
+    LIGHTNING = "Lightning"
+    NECROTIC = "Necrotic"
+    POISON = "Poison"
+    PSYCHIC = "Psychic"
+    RADIANT = "Radiant"
+    THUNDER = "Thunder"
 
-# =============================================================================
-# if Race == "Abomination": 
-# =============================================================================
+class ArmourTypes(enum.StrEnum):
+    LIGHT = "Light Armour"
+    MEDIUM = "Medium Armour"
+    HEAVY = "Heavy Armour"
+    SHIELD = "Shield"
+
+class Weapons(enum.StrEnum):
+    BATTLEAXE = "Battleaxe"
+    BLOWGUN = "Blowgun"
+    CLUB = "Club"
+    DAGGER = "Dagger"
+    DART = "Dart"
+    FLAIL = "Flail"
+    GLAIVE = "Glaive"
+    GREATAXE = "Greataxe"
+    GREATCLUB = "Greatclub"
+    GREATSWORD = "Greatsword"
+    HALBERD = "Halberd"
+    HAND_CROSSBOW = "Hand Crossbow"
+    HANDAXE = "Handaxe"
+    HEAVY_CROSSBOW = "Heavy Crossbow"
+    JAVELIN = "Javelin"
+    LANCE = "Lance"
+    LIGHT_CROSSBOW = "Light Crossbow"
+    LIGHT_HAMMER = "Light Hammer"
+    LONGBOW = "Longbow"
+    LONGSWORD = "Longsword"
+    MACE = "Mace"
+    MAUL = "Maul"
+    MORNINGSTAR = "Morningstar"
+    NET = "Net"
+    PIKE = "Pike"
+    QUARTERSTAFF = "Quarterstaff"
+    RAPIER = "Rapier"
+    SCIMITAR = "Scimitar"
+    SHORTBOW = "Shortbow"
+    SHORTSWORD = "Shortsword"
+    SICKLE = "Sickle"
+    SLING = "Sling"
+    SPEAR = "Spear"
+    TRIDENT = "Trident"
+    WAR_PICK = "War Pick"
+    WARHAMMER = "Warhammer"
+    WHIP = "Whip"
+
+class Languages(enum.StrEnum):
+    COMMON = "Common"
+    DWARVISH = "Dwarvish"
+    ELVISH = "Elvish"
+    GIANT = "Giant"
+    GNOMISH = "Gnomish"
+    GOBLIN = "Goblin"
+    HALFLING = "Halfling"
+    ORC = "Orc"
+
+class ExoticLanguages(enum.StrEnum):
+    ABYSSAL = "Abyssal"
+    CELESTIAL = "Celestial"
+    DRACONIC = "Draconic"
+    DEEP_SPEECH = "Deep Speech"
+    INFERNAL = "Infernal"
+    PRIMORDIAL = "Primordial"
+    SYLVAN = "Sylvan"
+    UNDERCOMMON = "Undercommon"
+
+AllLanguages = Languages | ExoticLanguages
+
+class Tools(enum.StrEnum): # TODO Check grammar on plural
+    DISGUISE = "Disguise Kit"
+    FORGERY = "Forgery Kit"
+    HERBALIST = "Herbalism Kit"
+    LAND_VEHICLES = "Land Vehicles"
+    NAVIGATOR = "Navigator's Tools"
+    THIEF = "Thieves' Tools"
+    WATER_VEHICLES = "Water Vehicles"
+
+class ArtisanTools(enum.StrEnum):
+    ALCHEMIST = "Alchemist's Supplies"
+    BREWER = "Brewer's Supplies"
+    CALLIGRAPHER = "Calligrapher's Supplies"
+    CARPENTER = "Carpenter's Tools"
+    CARTOGRAPHER = "Cartographer's Tools"
+    COBBLER = "Cobbler's Tools"
+    COOK = "Cook's Utensils"
+    GLASSBLOWER = "Glassblower's Tools"
+    JEWELER = "Jeweler's Tools"
+    LEATHERWORKER = "Leatherworker's Tools"
+    MASON = "Mason's Tools"
+    PAINTER = "Painter's Tools"
+    POTTER = "Potter's Tools"
+    SMITH = "Smith's Tools"
+    TINKER = "Tinker's Tools"
+    WEAVER = "Weaver's Tools"
+    WOODCARVER = "Woodcarver's Tools"
+
+class GamingSets(enum.StrEnum):
+    DICE = "Dice Set"
+    DRAGONCHESS = "Dragonchess Set"
+    PLAYING_CARDS = "Playing Card Set"
+    THREE_DRAGON_ANTE = "Three-Dragon Ante Set"
+
+class MusicalInstruments(enum.StrEnum):
+    BAGPIPES = "Bagpipes"
+    DRUM = "Drum"
+    DULCIMER = "Dulcimer"
+    FLUTE = "Flute"
+    LUTE = "Lute"
+    LYRE = "Lyre"
+    HORN = "Horn"
+    PAN_FLUTE = "Pan Flute"
+    SHAWM = "Shawm"
+    VIOL = "Viol"
+
+AllTools = Tools | ArtisanTools | GamingSets | MusicalInstruments
+
+class WeaponTypes(enum.StrEnum):
+    MARTIAL_WEAPONS = "Martial Weapons"
+    SIMPLE_WEAPONS = "Simple Weapons"
+
+class Sizes(enum.StrEnum):
+    TINY = "Tiny"
+    SMALL = "Small"
+    MEDIUM = "Medium"
+    LARGE = "Large"
+    HUGE = "Huge"
+    GARGANTUAN = "Gargantuan"
+
+class Attributes(enum.StrEnum):
+    STR = "Strength"
+    DEX = "Dexterity"
+    CON = "Constitution"
+    INT = "Intelligence"
+    WIS = "Wisdom"
+    CHA = "Charisma"
+
+class Skills(enum.StrEnum):
+    ACROBATICS = "Acrobatics"
+    ANIMAL_HANDLING = "Animal Handling"
+    ARCANA = "Arcana"
+    ATHLETICS = "Athletics"
+    DECEPTION = "Deception"
+    HISTORY = "History"
+    INSIGHT = "Insight"
+    INTIMIDATION = "Intimidation"
+    INVESTIGATION = "Investigation"
+    MEDICINE = "Medicine"
+    NATURE = "Nature"
+    PERCEPTION = "Perception"
+    PERFORMANCE = "Performance"
+    PERSUASION = "Persuasion"
+    RELIGION = "Religion"
+    SLEIGHT_OF_HAND = "Sleight of Hand"
+    STEALTH = "Stealth"
+    SURVIVAL = "Survival"
+
+class Trait(enum.StrEnum):
+    ACID_BREATH = "Acid Breath Weapon (5x30 ft line)"
+    LIGHTNING_BREATH = "Lightning Breath Weapon (5x30 ft line)"
+    FIRE_BREATH_LINE = "Fire Breath Weapon (5x30 ft line)"
+    FIRE_BREATH_CONE = "Fire Breath Weapon (15 ft cone)"
+    POISON_BREATH = "Poison Breath Weapon (15 ft cone)"
+    COLD_BREATH = "Cold Breath Weapon (15 ft cone)"
+    ARTIFICERS_LORE = "Artificer's Lore"
+    BRAVE = "Brave"
+    CANTRIP = "Cantrip"
+    DARKVISION60 = "Darkvision (60 ft)"
+    DARKVISION120 = "Darkvision (120 ft)"
+    DROW_MAGIC = "Drow Magic"
+    DWARVEN_RESILIENCE = "Dwarven Resilience"
+    FEY_ANCESTRY = "Fey Ancestry"
+    GNOME_CUNNING = "Gnome Cunning"
+    HALFLING_NIMBLENESS = "Halfling Nimbleness"
+    INFERNAL_LEGACY = "Infernal Legacy"
+    KEEN_SENSES = "Keen Senses"
+    LUCKY = "Lucky"
+    MASK_OF_THE_WILD = "Mask of the Wild"
+    NATURAL_ILLUSIONIST = "Natural Illusionist"
+    NATURALLY_STEALTHY = "Naturally Stealthy"
+    RELENTLESS_ENDURANCE = "Relentless Endurance"
+    SAVAGE_ATTACKS = "Savage Attacks"
+    SPEAK_WITH_SMALL_BEASTS = "Speak with Small Beasts"
+    STOUT_RESILIENCE = "Stout Resilience"
+    SUNLIGHT_SENSITIVITY = "Sunlight Sensitivity"
+    TINKER = "Tinker"
+    FEAT = "Feat"
+    TRANCE = "Trance"
+
+class BackgroundTrait(enum.StrEnum):
+    BY_POPULAR_DEMAND = "By Popular Demand"
+    BAD_REPUTATION = "Bad Reputation"
+    CITY_SECRETS = "City Secrets"
+    CRIMINAL_CONTACT = "Criminal Contact"
+    FALSE_IDENTITY = "False Identity"
+    GUILD_MEMBERSHIP = "Guild Membership"
+    MILITARY_RANK = "Military Rank"
+    POSITION_OF_PRIVILEGE = "Position of Privilege"
+    RESEARCHER = "Researcher"
+    RETAINERS = "Retainers"
+    RUSTIC_HOSPITALITY = "Rustic Hospitality"
+    SHELTER_OF_THE_FAITHFUL = "Shelter of the Faithful"
+    SHIPS_PASSAGE = "Ship's Passage"
+    WANDERER = "Wanderer"
+
+AllTraits = Trait | BackgroundTrait
+
+### RACE DEFINITIONS ###
+
+class RaceName(enum.StrEnum):
+    DRAGONBORN = "Dragonborn"
+    DWARF = "Dwarf"
+    ELF = "Elf"
+    GNOME = "Gnome"
+    HALFLING = "Halfling"
+    HALF_ELF = "Half-Elf"
+    HALF_ORC = "Half-Orc"
+    HUMAN = "Human"
+    TIEFLING = "Tiefling"
     
-if race == "Bugbear":
-    attr_str = stat_increase(attr_str, 2)
-    attr_dex = stat_increase(attr_dex, 1)
-    age = normal(16,60)
-    size_mod = normal(2,16)
-    height = 6 * 12 + 4 + size_mod
-    weight = 230 + size_mod * normal(2,12)
-    eyes = ["Yellow", "Orange", "Red", "Brown", "Greenish White"]
-    eyes = random.choice(eyes)
-    skin = ["Yellow", "Muddy Yellow", "Reddish Orange", "Reddish Brown"]
-    skin = random.choice(skin)
-    hair = ["Brown", "Red"]
-    hair = random.choice(hair)
-    speed = 30
-    traits.extend(["Darkvision (60ft)", "Long-Limbed", "Powerful Build", "Surprise Attack"])
-    skill_profs.extend(["Stealth"])
-    
-if race == "Dragonborn":
-    subrace = ["Red", "Green", "Blue", "White", "Black", "Gold", "Silver", "Brass", "Copper", "Bronze"]
-    subrace = random.choice(subrace)
-    attr_str = stat_increase(attr_str, 2)
-    attr_cha = stat_increase(attr_cha, 1)
-    age = normal(15,60)
-    size_mod = normal(2,16)
-    height = 5 * 12 + 6 + size_mod
-    weight = 175 + size_mod * normal(2,12)
-    eyes = ["Red", "Gold"]
-    eyes = random.choice(eyes)
-    skin = subrace + " Scales"
-    speed = 30
-    if subrace == "Black":
-        resistances.extend(["Acid"])
-        traits.extend(["Acid Breath"])
-    if subrace == "Blue":
-        resistances.extend(["Lightning"])
-        traits.extend(["Lightning Breath"])
-    if subrace == "Brass":
-        resistances.extend(["Fire"])
-        traits.extend(["Fire Breath"])
-    if subrace == "Bronze":
-        resistances.extend(["Lightning"])
-        traits.extend(["Lightning Breath"])
-    if subrace == "Copper":
-        resistances.extend(["Acid"])
-        traits.extend(["Acid Breath"])
-    if subrace == "Gold":
-        resistances.extend(["Fire"])
-        traits.extend(["Fire Breath"])
-    if subrace == "Green":
-        resistances.extend(["Poison"])
-        traits.extend(["Poison Breath"])
-    if subrace == "Red":
-        resistances.extend(["Fire"])
-        traits.extend(["Fire Breath"])
-    if subrace == "Silver":
-        resistances.extend(["Cold"])
-        traits.extend(["Cold Breath"])
-    if subrace == "White":
-        resistances.extend(["Cold"])
-        traits.extend(["Cold Breath"])
+RaceAttributes = int | list[str | Trait | DamageType | tuple[Attributes, int] | Skills] | tuple[int, int]
 
-if race == "Dryad": # Extra Race I found https://www.dandwiki.com/wiki/Dryad_(5e_Race)
-    subrace = ["Watcher"]  # Leaving this as a list in case I can find a balanced version of the Guardian subclass
-    subrace = random.choice(subrace)
-    attr_dex = stat_increase(attr_dex, 1)
-    attr_wis = stat_increase(attr_wis, 2)
-    age = "N/A"
-    size_mod = normal(2,6)
-    height = 5 * 12 + 5 + size_mod
-    weight = 40 + size_mod * normal(2,6)
-    eyes = "Changes with the Seasons"
-    skin = ["Orange", "Green", "Yellowish Green"]
-    skin = random.choice(skin)
-    hair = "Leaves that Change with the Seasons"
-    speed = 30
-    traits.extend(["Barkskin", "Forest Blend", "Photosynthesis", "Tree Stride", "Nature Whisperer"])
-    vulnerabilities.extend(["Fire"])
-    
-if race == "Dwarf":
-    subrace = ["Duergar", "Hill", "Mountain"]
-    subrace = random.choice(subrace)
-    attr_con = stat_increase(attr_con, 2)
-    if subrace == "Hill":
-        attr_wis = stat_increase(attr_wis, 1)
-    if subrace == "Mountain":
-        attr_str = stat_increase(attr_str, 2)
-    if subrace == "Duergar":
-        attr_str = stat_increase(attr_str, 1)
-    age = normal(20,320)
-    size_mod = normal(2,8)
-    if subrace == "Hill":
-        height = 3 * 12 + 8 + size_mod
-        weight = 115 + size_mod * normal(2,12)
-    if subrace == "Mountain":
-        height = 4 * 12 + size_mod
-        weight = 130 + size_mod * normal(2,12)
-    if subrace == "Duergar":
-        height = 3 * 12 + 8 + size_mod
-        weight = 115 + size_mod * normal(2,12)
-    eyes = ["Brown", "Hazel", "Green"]
-    eyes = random.choice(eyes)
-    skin = ["White/Fair", "Lightly Tanned", "Medium/Tanned", "Olive/Moderate Brown", "Brown", "Dark Brown", "Very Dark Brown/Black"]
-    skin = random.choice(skin)
-    hair = ["Bald", "Brown", "Black", "Blond", "Red"]
-    hair = random.choice(hair)
-    speed = 25
-    weapon_profs.extend(["Battleaxe", "Handaxe", "Throwing Hammer", "Warhammer"])
-    traits.extend(["Dwarven Resilience"])
-    if subrace == "Hill":
-        hp = hp + level
-        traits.extend(["Darkvision (60ft)"])
-    if subrace == "Mountain":
-        armour_profs.extend(["Light Armour", "Medium Armour"])
-        traits.extend(["Darkvision (60ft)"])
-    if subrace == "Duergar":
-        traits.extend(["Darkvision (120ft)", "Duergar Resilience", "Duergar Magic", "Sunlight Sensitivity"])
-    
-if race == "Elf":
-    subrace = ["Eladrin", "Drow", "High", "Sea", "Shadar-Kai", "Wood"]
-    subrace = random.choice(subrace)
-    attr_dex = stat_increase(attr_dex, 2)
-    if subrace == "Eladrin" or subrace == "Drow":
-        attr_cha = stat_increase(attr_cha, 1)
-    if subrace == "High":
-        attr_int = stat_increase(attr_int, 1)
-    if subrace == "Sea" or subrace == "Shadar-Kai":
-        attr_con = stat_increase(attr_con, 1)
-    if subrace == "Wood":
-        attr_wis = stat_increase(attr_wis, 1)
-    age = normal(20,700)
-    if subrace == "Eladrin":
-        size_mod = normal(2,24)
-    if subrace == "Drow":
-        size_mod = normal(2,12)
-    if subrace == "High" or subrace == "Wood":
-        size_mod = normal(2,20)
-    if subrace == "Sea" or subrace == "Shadar-Kai":
-        size_mod = normal(2,16)
-    if subrace == "Eladrin":
-        height = 4 * 12 + 6 + size_mod
-        weight = 90 + size_mod * random.randint(1,4)
-    if subrace == "Drow":
-        height = 4 * 12 + 5 + size_mod
-        weight = 75 + size_mod * random.randint(1,6)
-    if subrace == "High":
-        height = 4 * 12 + 6 + size_mod
-        weight = 90 + size_mod * random.randint(1,4)
-    if subrace == "Sea":
-        height = 4 * 12 + 6 + size_mod
-        weight = 90 + size_mod * random.randint(1,4)
-    if subrace == "Shadar-Kai":
-        height = 4 * 12 + 8 + size_mod
-        weight = 90 + size_mod * random.randint(1,4)
-    if subrace == "Wood":
-        height = 4 * 12 + 6 + size_mod
-        weight = 100 + size_mod * random.randint(1,4)
-    eyes = ["Blue", "Violet", "Green"]
-    eyes = random.choice(eyes)
-    skin = ["Lightly Tanned", "Olive/Moderate Brown", "Brown", "Dark Brown"]
-    skin = random.choice(skin)
-    hair = ["Dark Brown", "Autumn Orange", "Mossy Green", "Deep Gold"]
-    hair = random.choice(hair)
-    speed = 30
-    traits.extend(["Keen Senses", "Fey Ancestry", "Trance"])
-    if subrace == "Eladrin":
-        subrace = ["Eladrin of Autumn", "Eladrin of Winter", "Eladrin of Spring", "Eladrin of Summer"]
-        subrace = random.choice(subrace)
-        traits.extend(["Darkvision (60ft)", "Fey Step"])
-    if subrace == "Drow":
-        weapon_profs.extend(["Rapiers", "Shortswords", "Hand Crossbows"])
-        traits.extend(["Darkvision (120ft)", "Sunlight Sensitivity", "Drow Magic"])
-    if subrace == "High":
-        weapon_profs.extend(["Longswords", "Shortswords", "Shortbows", "Longbows"])
-        traits.extend(["Wizard Cantrip"])
-    if subrace == "Sea":
-        weapon_profs.extend(["Spears", "Tridents", "Light Crossbows", "Nets"])
-        traits.extend(["Swim (30ft)", "Child of the Sea", "Friend of the Sea"])
-    if subrace == "Shadar-Kai":
-        resistances.extend(["Necrotic"])
-        traits.extend(["Blessing of the Raven Queen"])
-    if subrace == "Wood":
-        speed = 35
-        weapon_profs.extend(["Longswords", "Shortswords", "Shortbows", "Longbows"])
-        traits.extend(["Mask of the Wild"])
+class Race:
+    name: RaceName
+    subraces: list[Any]
+    stat_increases: list[tuple[Attributes, int]] = []
+    age_range: tuple[int, int]
+    size_mod_range: tuple[int, int]
+    base_height: int
+    base_weight: int
+    weight_range: tuple[int, int]
+    speed: int
+    size: Sizes
+    eyes: list[str]
+    skin: list[str]
+    hair: list[str]
+    traits: list[Trait] = []
+    resistances: list[DamageType] = []
+    immunities: list[DamageType] = []
+    vulnerabilities: list[DamageType] = []
+    skill_proficiencies: list[Skills] = []
+    possible_skill_profs: list[Skills] = []
+    skill_prof_count: int
+    tool_proficiencies: list[AllTools] = []
+    weapon_proficiencies: list[Weapons | WeaponTypes] = []
+    languages: list[AllLanguages] = []
+    possible_languages: list[AllLanguages] = []
+    language_count: int
 
-if race == "Firbolg":
-    attr_wis = stat_increase(attr_wis, 2)
-    attr_str = stat_increase(attr_str, 1)
-    age = normal(30,450)
-    size_mod = normal(2,24)
-    height = 6 * 12 + 4 + size_mod
-    weight = 210 + size_mod * normal(1,4)
-    eyes = ["Blue", "Violet", "Green"]
-    eyes = random.choice(eyes) 
-    skin = ["Light Pink", "Grayish Blue"]
-    skin = random.choice(skin)
-    hair = ["Red", "Blonde", "Dark Brown"]
-    hair = random.choice(hair)
-    speed = 30
-    traits.extend(["Firbolg Magic", "Hidden Step", "Powerful Build", "Speech of Beast and Leaf"])
-
-if race == "Genasi":
-    subrace = ["Air", "Earth", "Fire", "Water"]
-    subrace = random.choice(subrace)
-    attr_con = stat_increase(attr_con, 2)
-    if subrace == "Air":
-        attr_dex = stat_increase(attr_dex, 1)
-    if subrace == "Earth":
-        attr_str = stat_increase(attr_str, 1)
-    if subrace == "Fire":
-        attr_int = stat_increase(attr_int, 1)
-    if subrace == "Water":
-        attr_wis = stat_increase(attr_wis, 1)
-    age = normal(20,100)
-    size_mod = normal(2,20)
-    height = 4 * 12 + 8 + size_mod
-    weight = 110 + size_mod * normal(2,8)
-    if subrace == "Air":
-        eyes = "Pale Blue"
-        skin = "Blueish Silver"
-        hair = "Blue and Gray Crystalline Hair"
-    if subrace == "Earth":
-        eyes = "Golden"
-        skin = "Brownish Gray"
-        hair = "Black"
-    if subrace == "Fire":
-        eyes = "Reddish Orange"
-        skin = "Bronze"
-        hair = "Orange"
-    if subrace == "Water":
-        eyes = "Deep Blue"
-        skin = "Green"
-        hair = "Dark Green"
-    speed = 30
-    if subrace == "Air":
-        traits.extend(["Unending Breath", "Mingle with the Wind"])
-    if subrace == "Earth":
-        traits.extend(["Earth Walk", "Merge with Stone"])
-    if subrace == "Fire":
-        resistances.extend(["Fire"])
-        traits.extend(["Darkvision(60ft)", "Reach to the Blaze"])
-    if subrace == "Water":
-        resistances.extend(["Acid"])
-        traits.extend(["Amphibious", "Swim (30ft)", "Call to the Wave"])
-
-if race == "Gith":
-    subrace = ["Githyanki", "Githzerai"]
-    subrace = random.choice(subrace)
-    attr_int = stat_increase(attr_int, 1)
-    if subrace == "Githyanki":
-        attr_str = stat_increase(attr_str, 2)
-    if subrace == "Githzerai":
-        attr_wis = stat_increase(attr_wis, 2)
-    age = normal(20,80)
-    size_mod = normal(2,24)
-    if subrace == "Githyanki":
-        height = 5 * 12 + size_mod
-        weight = 100 + size_mod * normal(2,8)
-    if subrace == "Githzerai":
-        height = 4 * 12 + 11 + size_mod
-        weight = 90 + size_mod * normal(2,8)
-    eyes = "Yellow"
-    skin = ["Fair", "Pale Yellow with Green Tones", "Pale Yellow with Brown Tones"]
-    skin = random.choice(skin)
-    hair = ["Russet", "Black", "Gray"]
-    hair = random.choice(hair)
-    speed = 30
-    if subrace == "Githyanki":
-        armour_profs.extend(["Light Armour", "Medium Armour"])
-        weapon_profs.extend(["Shortswords", "Longswords", "Greatswords"])
-        traits.extend(["Decadent Mastery", "Githyanki Psionics"])
-    if subrace == "Githzerai":
-        traits.extend(["Mental Discipline", "Githzerai Psionics"])
-    
-if race == "Gnome":
-    subrace = ["Deep", "Forest", "Rock"]
-    subrace = random.choice(subrace)
-    attr_int = stat_increase(attr_int, 2)
-    if subrace == "Deep" or subrace == "Forest":
-        attr_dex = stat_increase(attr_dex, 1)
-    if subrace == "Rock":
-        attr_con = stat_increase(attr_con, 1)
-    age = normal(20,400)
-    size_mod = normal(2,8)
-    height = 2 * 12 + 11 + size_mod
-    weight = 35 + size_mod
-    eyes = ["Glittering Opaque Black", "Glittering Opaque Blue"]
-    eyes = random.choice(eyes)
-    skin = ["Lightly Tanned", "Medium/Tanned", "Olive/Moderate Brown", "Brown", "Dark Brown", "Very Dark Brown/Black", "Rocky Gray"]
-    skin = random.choice(skin)
-    hair = ["Red", "Black", "Grey", "Dark Brown", "Brown", "Dirty Blonde", "Blonde", "White"]
-    hair = random.choice(hair)
-    speed = 25
-    traits.extend(["Gnome Cunning"])
-    if subrace == "Deep":
-        traits.extend(["Darkvision (120ft)", "Stone Camoflage"])
-    if subrace == "Forest":
-        traits.extend(["Darkvision (60ft)", "Natural Illusionist", "Speak with Small Beasts"])
-    if subrace == "Rock":
-        tool_profs.extend(["Artisan's Tools"])
-        traits.extend(["Artificer's Lore", "Tinker"])
-
-if race == "Goblin":
-    attr_dex = stat_increase(attr_dex, 2)
-    attr_con = stat_increase(attr_con, 1)
-    age = normal(10,35)
-    size_mod = normal(2,8)
-    height = 2 * 12 + 11 + size_mod
-    weight = 40 + size_mod
-    eyes = "Beady Black"
-    skin = ["Brownish Orange", "Greenish Orange", "Brownish Green", "Green"]
-    skin = random.choice(skin)
-    hair = ["Black", "Deep Grey", "Silver"]
-    hair = random.choice(hair)
-    speed = 30
-    traits.extend(["Darkvision (60ft)", "Fury of the Small", "Nimble Escape"])
-
-if race == "Goliath":
-    attr_str = stat_increase(attr_str, 2)
-    attr_con = stat_increase(attr_con, 1)
-    age = normal(20,80)
-    size_mod = normal(2,20)
-    height = 6 * 12 + 8 + size_mod
-    weight = 270 + size_mod * normal(2,12)
-    eyes = ["Blue", "Green"]
-    eyes = random.choice(eyes)
-    skin = "Grey"
-    hair = ["Black", "Dark Brown", "Dark Grey"]
-    hair = random.choice(hair)
-    speed = 30
-    skill_profs.extend(["Athletics"])
-    traits.extend(["Stone's Endurance", "Powerful Build", "Mountain Born"])
-    
-if race == "Hobgoblin":
-    attr_con = stat_increase(attr_con, 2)
-    attr_int = stat_increase(attr_int, 1)
-    age = normal(20,80)
-    size_mod = normal(2,16)
-    height = 5 * 12 + 6 + size_mod
-    weight = 175 + size_mod * normal(2,12)
-    eyes = ["Black", "Red"]
-    eyes = random.choice(eyes)
-    skin = ["Orange", "Dirty Orange", "Red", "Dull Red", "Reddish Brown"]
-    skin = random.choice(skin)
-    hair = ["Dark Brown", "Dark Grey", "Orange", "Red"]
-    hair = random.choice(hair)
-    speed = 30
-    traits.extend(["Darkvision (60ft)", "Martial Training", "Saving Face"])
-
-if race == "Half-Elf":
-    subrace = ["N/A", "Drow", "Sun", "Moon", "Wood"] # Keen Senses subrace removed because it is obsolete
-    subrace = random.choice(subrace)
-    attr_cha = stat_increase(attr_cha, 2)
-    age = normal(20,160)
-    size_mod = normal(2,16)
-    height = 4 * 12 + 9 + size_mod
-    weight = 110 + size_mod * normal(2,8)
-    eyes = ["Blue", "Violet", "Green"]
-    eyes = random.choice(eyes)
-    skin = ["Light/Pale White", "White/Fair", "Lightly Tanned", "Medium/Tanned", "Olive/Moderate Brown", "Brown", "Dark Brown"]
-    skin = random.choice(skin)
-    hair = ["Red", "Blond", "Brown", "Black"]
-    hair = random.choice(hair)
-    speed = 30
-    traits.extend(["Darkvision (60ft)", "Fey Ancestry"])
-    if subrace == "N/A":
-        traits.extend(["Skill Versatility"])
-    if subrace == "Drow":
-        traits.extend(["Drow Magic"])
-    if subrace == "Sun" or subrace == "Moon":
-        Choice = random.choice(["Elf Weapon Training", "Wizard Cantrip"])
-        traits.extend([Choice])
-    if subrace == "Wood":
-        Choice = random.choice(["Elf Weapon Training", "Fleet of Foot", "Mask of the Wild"])
-        traits.extend([Choice])
-
-if race == "Halfling":
-    subrace = ["Ghostwise", "Lightfoot", "Stout"]
-    subrace = random.choice(subrace)
-    attr_dex = stat_increase(attr_dex, 2)
-    if subrace == "Ghostwise":
-        attr_wis = stat_increase(attr_wis, 1)
-    if subrace == "Lightfoot":
-        attr_cha = stat_increase(attr_cha, 1)
-    if subrace == "Stout":
-        attr_con = stat_increase(attr_con, 1)
-    age = normal(20,200)
-    size_mod =  normal(2,8)
-    height = 2 * 12 + 7 + size_mod
-    weight = 35 + size_mod
-    eyes = "Brown"
-    skin = ["Light/Pale White", "White/Fair", "Lightly Tanned", "Medium/Tanned", "Olive/Moderate Brown", "Brown", "Dark Brown", "Very Dark Brown/Black"]
-    skin = random.choice(skin)
-    hair = ["Aubrun", "Black", "Brown", "Gray"]
-    hair = random.choice(hair)
-    speed = 25
-    traits.extend(["Lucky", "Brave", "Halfling Nimbleness"])
-    if subrace == "Ghostwise":
-        traits.extend(["Silent Speech"])
-    if subrace == "Lightfoot":
-        traits.extend(["Naturally Stealthy"])
-    if subrace == "Stout":
-        resistances.extend(["Poison"])
-        traits.extend(["Stout Resilience"])
-    
-if race == "Half-Orc":
-    attr_str = stat_increase(attr_str, 2)
-    attr_con = stat_increase(attr_con, 1)
-    age = normal(14,60)
-    size_mod = normal(2,20)
-    height = 4 * 12 + 10 + size_mod
-    weight = 140 + size_mod * normal(2,12)
-    eyes = ["Reddish Brown", "Reddish Blue", "Reddish Green", "Reddish Grey"]
-    eyes = random.choice(eyes)
-    skin = "Greyish Green"
-    hair = ["Dark Brown", "Bald", "Red"]
-    hair = random.choice(hair)
-    speed = 30
-    skill_profs.extend(["Intimidation"])
-    traits.extend(["Darkvision (60ft)", "Relentless Endurance", "Savage Attacks"])
-
-if race == "Human": # I have not accounted for the different Human ethnicities
-    subrace = ["Stat Increase", "Variant", "Variant"] # Two chances for variant, just to spice things up
-    subrace = random.choice(subrace)
-    if subrace == "Stat Increase":
-        attr_str = stat_increase(attr_str, 1)
-        attr_dex = stat_increase(attr_dex, 1)
-        attr_con = stat_increase(attr_con, 1)
-        attr_int = stat_increase(attr_int, 1)
-        attr_wis = stat_increase(attr_wis, 1)
-        attr_cha = stat_increase(attr_cha, 1)
-    if subrace == "Variant":
-        choices = random.sample(stats, 2)  # Stats list is found on line 101 above the STR/DEX/CON/INT/WIS/CHA = 0
-        if "STR" in choices:
-            attr_str = stat_increase(attr_str, 1)
-        if "DEX" in choices:
-            attr_dex = stat_increase(attr_dex, 1)
-        if "CON" in choices:
-            attr_con = stat_increase(attr_con, 1)
-        if "INT" in choices:
-            attr_int = stat_increase(attr_int, 1)
-        if "WIS" in choices:
-            attr_wis = stat_increase(attr_wis, 1)
-        if "CHA" in choices:
-            attr_cha = stat_increase(attr_cha, 1)
-    age = normal(20,60)
-    size_mod = normal(2,20)
-    height = 4 * 12 + 8 + size_mod
-    weight = 110 + size_mod * normal(2,8)
-    eyes = ["Brown", "Hazel", "Blue", "Green", "Grey", "Amber"]
-    eyes = random.choice(eyes)
-    skin = ["Light/Pale White", "White/Fair", "Lightly Tanned", "Medium/Tanned", "Olive/Moderate Brown", "Brown", "Dark Brown", "Very Dark Brown/Black"]
-    skin = random.choice(skin)
-    hair = ["Black", "Brown", "Blonde", "Red", "White"]
-    hair = random.choice(hair)
-    speed = 30
-    if subrace == "Variant":
-        traits.extend(["Choice of Feat"])
-        skill_profs.extend([random.choice(skills)])
+    def apply_subrace(self, subrace: Any):
+        pass
+'''
+class (Race):
+    name = RaceName.
+    class Subrace(enum.StrEnum):
         
-if race == "Juiblexian":
-    subrace = ["Corrosive", "Blasphemy", "Mnemonic"]
-    subrace = random.choice(subrace)
-    attr_con = stat_increase(attr_con, 2)
-    if subrace == "Corrosive":
-        attr_dex = stat_increase(attr_dex, 1)
-    if subrace == "Blasphemy":
-        attr_cha = stat_increase(attr_cha, 1)
-    if subrace == "Mnemonic":
-        attr_int = stat_increase(attr_int, 1)
-    age = normal(100,200)
-    size_mod = normal(2,20)
-    height = 4 * 12 + 10 + size_mod
-    weight = 80 + size_mod * normal(2,8)
-    eyes = "N/A"
-    skin = "Transparent " + random.choice(["Green", "Blueish White", "Yellow", "Orange", "Blue", "Red"])
-    hair = "N/A"
+    subraces = list(Subrace)
+    stat_increases = [
+        (Attributes., 2),
+        (Attributes., 1)
+    ]
+    age_range = ()
+    size_mod_range = ()
+    base_height = 
+    base_weight = 
+    weight_range = ()
     speed = 30
-    immunities.extend(["Poison", "Poisoned"])
-    traits.extend(["Amorphous Ooze", "Blind Vision", "Gelatinous Trance"])
-    if subrace == "Corrosive":
-        traits.extend(["Caustic Touch", "Corrosive Body"])
-        resistances.extend(["Acid"])
-    if subrace == "Blasphemy":
-        traits.extend(["Elemental Chaos", "Innate Spellcasting"])
-    if subrace == "Mnemonic":
-        traits.extend(["False Appearance", "Mnemonic Echoes"])
+    size = Sizes.
+    eyes = []
+    skin = []
+    hair = []
+    traits = [Trait.]
+    resistances = []
+    immunities = []
+    vulnerabilities = []
+    skill_proficiencies = []
+    possible_skill_profs = []
+    skill_prof_count = 0
+    weapon_proficiencies = []
+    languages = []
+    possible_languages = []
+    language_count = 0
+    
+    def apply_subrace(self, subrace: Any):
+        if subrace == :
+            self.
+'''
 
-if race == "Kender": # Extra Race I found https://www.dndbeyond.com/races/670-kender
-    attr_dex = stat_increase(attr_dex, 2)
-    attr_cha = stat_increase(attr_cha, 1)
-    age = normal(15,80)
-    size_mod = normal(2,8)
-    height = 3 * 12 + 4 + size_mod
-    weight = 50 + size_mod * random.randint(1,4)
-    eyes = ["Brown", "Hazel", "Blue", "Green", "Grey", "Amber"]
-    eyes = random.choice(eyes)
+class Dragonborn(Race):
+    name = RaceName.DRAGONBORN
+    # subraces = ["Red", "Green", "Blue", "White", "Black", "Gold", "Silver", "Brass", "Copper", "Bronze"]
+    class Subrace(enum.StrEnum):
+        RED = "Red"
+        GREEN = "Green"
+        BLUE = "Blue"
+        WHITE = "White"
+        BLACK = "Black"
+        GOLD = "Gold"
+        SILVER = "Silver"
+        BRASS = "Brass"
+        COPPER = "Copper"
+        BRONZE = "Bronze"
+    subraces = list(Subrace)
+    stat_increases = [
+        (Attributes.STR, 2),
+        (Attributes.CHA, 1)
+    ]
+    age_range = (15, 60)
+    size_mod_range = (2, 16)
+    base_height = 5 * 12 + 6
+    base_weight = 175
+    weight_range = (2, 12)
+    speed = 30
+    size = Sizes.MEDIUM
+    eyes = ["Red", "Gold"]
+    languages = [Languages.COMMON, ExoticLanguages.DRACONIC]
+    
+    def apply_subrace(self, subrace: Any):
+        self.skin = [f"{subrace} Scales"]
+        if subrace == Dragonborn.Subrace.RED:
+            self.resistances.append(DamageType.FIRE)
+            self.traits.append(Trait.FIRE_BREATH_CONE)
+        elif subrace == Dragonborn.Subrace.GREEN:
+            self.resistances.append(DamageType.POISON)
+            self.traits.append(Trait.POISON_BREATH)
+        elif subrace == Dragonborn.Subrace.BLUE:
+            self.resistances.append(DamageType.LIGHTNING)
+            self.traits.append(Trait.LIGHTNING_BREATH)
+        elif subrace == Dragonborn.Subrace.WHITE:
+            self.resistances.append(DamageType.COLD)
+            self.traits.append(Trait.COLD_BREATH)
+        elif subrace == Dragonborn.Subrace.BLACK:
+            self.resistances.append(DamageType.ACID)
+            self.traits.append(Trait.ACID_BREATH)
+        elif subrace == Dragonborn.Subrace.GOLD:
+            self.resistances.append(DamageType.FIRE)
+            self.traits.append(Trait.FIRE_BREATH_CONE)
+        elif subrace == Dragonborn.Subrace.BRASS:
+            self.resistances.append(DamageType.FIRE)
+            self.traits.append(Trait.FIRE_BREATH_LINE)
+        elif subrace == Dragonborn.Subrace.COPPER:
+            self.resistances.append(DamageType.ACID)
+            self.traits.append(Trait.ACID_BREATH)
+        elif subrace == Dragonborn.Subrace.BRONZE:
+            self.resistances.append(DamageType.FIRE)
+            self.traits.append(Trait.FIRE_BREATH_LINE)
+
+class Dwarf(Race):
+    name = RaceName.DWARF
+    class Subrace(enum.StrEnum):
+        HILL = "Hill"
+        MOUNTAIN = "Mountain"
+    subraces = list(Subrace)
+    stat_increases = [
+        (Attributes.CON, 2)
+    ]
+    age_range = (20, 320)
+    size_mod_range = (2, 8)
+    base_height = 3 * 12 + 8
+    base_weight = 115
+    weight_range = (2, 12)
+    speed = 25
+    size = Sizes.MEDIUM
+    eyes = ["Brown", "Hazel", "Green"]
+    skin = ["White/Fair", "Lightly Tanned", "Medium/Tanned", "Olive/Moderate Brown", "Brown",\
+            "Dark Brown", "Very Dark Brown/Black"]
+    hair = ["Bald", "Brown", "Black", "Blond", "Red"]
+    traits = [Trait.DWARVEN_RESILIENCE, Trait.DARKVISION60]
+    resistances = [DamageType.POISON]
+    
+    def apply_subrace(self, subrace: Any):
+        if subrace == Dwarf.Subrace.HILL:
+            self.stat_increases.append((Attributes.WIS, 1))
+            self.base_height = 3 * 12 + 8
+            self.base_weight = 115
+            # TODO add a hill dwarf check to the character for max hp (+1 per level)
+        if subrace == Dwarf.Subrace.MOUNTAIN:
+            self.stat_increases.append((Attributes.STR, 2))
+            self.base_height = 4 * 12
+            self.base_weight = 130
+
+class Elf(Race):
+    name = RaceName.ELF
+    class Subrace(enum.StrEnum):
+        DROW = "Drow"
+        HIGH = "High"
+        WOOD = "Wood"
+    subraces = list(Subrace)
+    stat_increases = [
+        (Attributes.DEX, 2),
+    ]
+    age_range = (20, 700) # Sizing in subrace
+    speed = 30
+    size = Sizes.MEDIUM
+    eyes = ["Blue", "Violet", "Green"]
+    skin = ["Lightly Tanned", "Olive/Moderate Brown", "Brown", "Dark Brown"]
+    hair = ["Dark Brown", "Autumn Orange", "Mossy Green", "Deep Gold"]
+    traits = [Trait.DARKVISION60, Trait.KEEN_SENSES, Trait.FEY_ANCESTRY, Trait.TRANCE]
+    languages = [Languages.COMMON, Languages.ELVISH]
+    
+    def apply_subrace(self, subrace: Any):
+        if subrace == Elf.Subrace.DROW:
+            self.stat_increases.append((Attributes.CHA, 1))
+            self.traits.remove(Trait.DARKVISION60)
+            self.traits.extend([Trait.DARKVISION120, Trait.DROW_MAGIC, Trait.SUNLIGHT_SENSITIVITY])
+            self.weapon_proficiencies.extend([Weapons.RAPIER, Weapons.SHORTSWORD, Weapons.HAND_CROSSBOW])
+            self.size_mod_range = (2, 12)
+            self.base_height = 4 * 12 + 5
+            self.base_weight = 75
+            self.weight_range = (1, 6)
+        elif subrace == Elf.Subrace.HIGH:
+            self.stat_increases.append((Attributes.INT, 1))
+            self.traits.extend([Trait.CANTRIP])
+            self.weapon_proficiencies.extend([Weapons.LONGSWORD, Weapons.SHORTSWORD, Weapons.SHORTBOW, Weapons.LONGBOW])
+            self.possible_languages = list(Languages)
+            self.language_count = 1
+            self.size_mod_range = (2, 20)
+            self.base_height = 4 * 12 + 6
+            self.base_weight = 90
+            self.weight_range = (1, 4)
+        elif subrace == Elf.Subrace.WOOD:
+            self.stat_increases.append((Attributes.WIS, 1))
+            self.traits.extend([Trait.MASK_OF_THE_WILD])
+            self.weapon_proficiencies.extend([Weapons.LONGSWORD, Weapons.SHORTSWORD, Weapons.SHORTBOW, Weapons.LONGBOW])
+            self.speed = 35
+            self.size_mod_range = (2, 20)
+            self.base_height = 4 * 12 + 6
+            self.base_weight = 100
+            self.weight_range = (1, 4)
+
+class Gnome(Race):
+    name = RaceName.GNOME
+    class Subrace(enum.StrEnum):
+        FOREST = "Forest"
+        ROCK = "Rock"
+    subraces = list(Subrace)
+    stat_increases = [
+        (Attributes.INT, 2)
+    ]
+    age_range = (20, 400)
+    size_mod_range = (2, 8)
+    base_height = 2 * 12 + 11
+    base_weight = 35
+    weight_range = (1, 1)
+    speed = 25
+    size = Sizes.SMALL
+    eyes = ["Glittering Opaque Black", "Glittering Opaque Blue"]
+    skin = ["Lightly Tanned", "Medium/Tanned", "Olive/Moderate Brown", "Brown", "Dark Brown", "Very Dark Brown/Black", "Rocky Gray"]
+    hair = ["Red", "Black", "Grey", "Dark Brown", "Brown", "Dirty Blonde", "Blonde", "White"]
+    traits = [Trait.DARKVISION60, Trait.GNOME_CUNNING]
+    languages = [Languages.COMMON, Languages.GNOMISH]
+    
+    def apply_subrace(self, subrace: Any):
+        if subrace == Gnome.Subrace.FOREST:
+            self.stat_increases.append((Attributes.DEX, 1))
+            self.traits.extend([Trait.NATURAL_ILLUSIONIST, Trait.SPEAK_WITH_SMALL_BEASTS])
+        elif subrace == Gnome.Subrace.ROCK:
+            self.stat_increases.append((Attributes.CON, 1))
+            self.traits.extend([Trait.ARTIFICERS_LORE, Trait.TINKER])
+            self.tool_proficiencies.append(ArtisanTools.TINKER)
+
+class HalfElf(Race):
+    name = RaceName.HALF_ELF
+    class Subrace(enum.StrEnum):
+        DROW = "Drow"
+        HIGH = "High"
+        WOOD = "Wood"
+    subraces = list(Subrace)
+    stat_increases = [
+        (Attributes.CHA, 2) # TODO "Any other two stats increase by 1"
+    ]
+    age_range = (20, 160)
+    size_mod_range = (2, 16)
+    base_height = 4 * 12 + 9
+    base_weight = 110
+    weight_range = (2, 8)
+    speed = 30
+    size = Sizes.MEDIUM
+    eyes = ["Blue", "Violet", "Green"]
+    skin = ["Light/Pale White", "White/Fair", "Lightly Tanned", "Medium/Tanned", "Olive/Moderate Brown", "Brown", "Dark Brown"]
+    hair = ["Red", "Blond", "Brown", "Black"]
+    traits = [Trait.DARKVISION60, Trait.FEY_ANCESTRY]
+    possible_skill_profs = list(Skills)
+    skill_prof_count = 2
+    languages = [Languages.COMMON, Languages.ELVISH]
+    possible_languages = list(Languages)
+    language_count = 1
+
+class Halfling(Race):
+    name = RaceName.HALFLING
+    class Subrace(enum.StrEnum):
+        LIGHTFOOT = "Lightfoot"
+        STOUT = "Stout"
+    subraces = list(Subrace)
+    stat_increases = [
+        (Attributes.DEX, 2)
+    ]
+    age_range = (20, 200)
+    size_mod_range = (2, 8)
+    base_height = 2 * 12 + 7
+    base_weight = 35
+    weight_range = (1, 1)
+    speed = 25
+    size = Sizes.SMALL
+    eyes = ["Brown"]
     skin = ["Light/Pale White", "White/Fair", "Lightly Tanned", "Medium/Tanned", "Olive/Moderate Brown", "Brown", "Dark Brown", "Very Dark Brown/Black"]
-    skin = random.choice(skin)
+    hair = ["Aubrun", "Black", "Brown", "Gray"]
+    traits = [Trait.BRAVE, Trait.HALFLING_NIMBLENESS, Trait.LUCKY]
+    languages = [Languages.COMMON, Languages.HALFLING]
+    
+    def apply_subrace(self, subrace: Any):
+        if subrace == Halfling.Subrace.LIGHTFOOT:
+            self.stat_increases.append((Attributes.CHA, 1))
+            self.traits.append(Trait.NATURALLY_STEALTHY)
+        elif subrace == Halfling.Subrace.STOUT:
+            self.stat_increases.append((Attributes.CON, 1))
+            self.traits.append(Trait.STOUT_RESILIENCE)
+            self.resistances.append(DamageType.POISON)
+
+class HalfOrc(Race):
+    name = RaceName.HALF_ORC
+    stat_increases = [
+        (Attributes.STR, 2),
+        (Attributes.CON, 1)
+    ]
+    age_range = (14, 60)
+    size_mod_range = (2, 20)
+    base_height = 4 * 12 + 10
+    base_weight = 140
+    weight_range = (2, 12)
+    speed = 30
+    size = Sizes.MEDIUM
+    eyes = ["Reddish Brown", "Reddish Blue", "Reddish Green", "Reddish Grey"]
+    skin = ["Greyish Green"]
+    hair = ["Dark Brown", "Bald", "Red"]
+    traits = [Trait.DARKVISION60, Trait.RELENTLESS_ENDURANCE, Trait.SAVAGE_ATTACKS]
+    skill_proficiencies = [Skills.INTIMIDATION]
+    languages = [Languages.COMMON, Languages.ORC]
+
+class Human(Race):
+    name = RaceName.HUMAN
+    class Subrace(enum.StrEnum):
+        NORMAL = "Normal"
+        VARIANT = "Variant"
+    subraces = list(Subrace)
+    age_range = (20, 60)
+    size_mod_range = (2, 20)
+    base_height = 4 * 12 + 8
+    base_weight = 110
+    weight_range = (2, 8)
+    speed = 30
+    size = Sizes.MEDIUM
+    eyes = ["Brown", "Hazel", "Blue", "Green", "Grey", "Amber"]
+    skin = ["Light/Pale White", "White/Fair", "Lightly Tanned", "Medium/Tanned", "Olive/Moderate Brown", "Brown", "Dark Brown", "Very Dark Brown/Black"]
     hair = ["Black", "Brown", "Blonde", "Red", "White"]
-    hair = random.choice(hair)
-    speed = 25
-    immunities.extend(["Frightened"])
-    tool_profs.extend(["Thieves' Tools"])
-    traits.extend(["Kender Pockets", "Nimbleness", "Taunt"])
+    languages = [Languages.COMMON]
+    possible_languages = list(Languages)
+    language_count = 1
     
-if race == "Kenku":
-    attr_dex = stat_increase(attr_dex, 2)
-    attr_wis = stat_increase(attr_wis, 1)
-    age = normal(12,45)
-    size_mod = normal(2,16)
-    height = 4 * 12 + 4 + size_mod
-    weight = 50 + size_mod * random.randint(1,6)
-    eyes = "Beady Black"
-    skin = "Black"
-    hair = "Black Feathers"
-    speed = 30
-    traits.extend(["Expert Forgery", "Mimicry"])
-    KenkuSkills = ["Acrobatics", "Deception", "Stealth", "Sleight of Hand"]
-    skill_profs.extend(random.sample(KenkuSkills, 2))
-    
-if race == "Kobold":
-    attr_dex = stat_increase(attr_dex, 2)
-    attr_str = stat_decrease(attr_str, 2)
-    age = normal(8,80)
-    size_mod = normal(2,8)
-    height = 2 * 12 + 1 + size_mod
-    weight = 25 + size_mod
-    eyes = ["Burnt Orange", "Red"]
-    eyes = random.choice(eyes)
-    skin = ["Reddish Brown", "Green", "Blue"]
-    skin = random.choice(skin)
-    hair = "N/A"
-    speed = 30
-    traits.extend(["Darkvision (60ft)", "Grovel, Cower and Beg", "Pack Tactics", "Sunlight Sensitivity"])
+    def apply_subrace(self, subrace: Any):
+        if subrace == Human.Subrace.NORMAL:
+            self.stat_increases.extend(
+                (Attributes.STR, 1),
+                (Attributes.DEX, 1),
+                (Attributes.CON, 1),
+                (Attributes.INT, 1),
+                (Attributes.WIS, 1),
+                (Attributes.CHA, 1)
+            )
+        elif subrace == Human.Subrace.VARIANT:
+            # TODO two random Attributes increase by 1
+            self.possible_skill_profs = list(Skills)
+            self.skill_prof_count = 1
+            self.traits.append(Trait.FEAT)
 
-if race == "Lizardfolk":
-    attr_con = stat_increase(attr_con, 2)
-    attr_wis = stat_increase(attr_wis, 1)
-    age = normal(14,45)
-    size_mod = normal(2,20)
-    height = 4 * 12 + 9 + size_mod
-    weight = 120 + size_mod * normal(2,12)
-    eyes = ["Red", "Green", "Gold", "Orange", "Blue"]
-    eyes = random.choice(eyes)
-    skin = ["Green Scales", "Greenish Brown", "Brown Scales", "Black Scales", "Tan Scales", "Albino Scales"]
-    skin = random.choice(skin)
-    hair = ["Pair of Spikes", "Lots of Spikes", "N/A"]
-    hair = random.choice(hair)
+class Tiefling(Race):
+    name = RaceName.TIEFLING
+    stat_increases = [
+        (Attributes.CHA, 2),
+        (Attributes.INT, 1)
+    ]
+    age_range = (20, 60)
+    size_mod_range = (2, 16)
+    base_height = 4 * 12 + 9
+    base_weight = 110
+    weight_range = (2, 8)
     speed = 30
-    traits.extend(["Bite", "Cunning Artisan", "Hold Breath", "Natural Armour", "Hungry Jaws"])
-    LizardfolkSkills = ["Animal Handling", "Nature", "Perception", "Stealth", "Survival"]
-    skill_profs.extend(random.sample(LizardfolkSkills, 2))
-    
-if race == "Mousefolk": # Extra Race I found https://www.dndbeyond.com/races/61879-mousefolk
-    attr_dex = stat_increase(attr_dex, 2)
-    attr_cha = stat_increase(attr_cha, 1)
-    age = normal(10,45)
-    size_mod = normal(2,8)
-    height = 2 * 12 + 11 + size_mod
-    weight = 40 + size_mod
-    eyes = ["Pink", "Black"]
-    eyes = random.choice(eyes)
-    skin = "Pink"
-    hair = ["Beige Fur", "Black Fur", "Chocolate Fur", "Coffee Fur", "Cream Fur", "Ivory Fur", "Lilac Fur", "Silver Fur", "White Fur", "Tan Fur"]
-    hair = random.choice(hair)
-    speed = 25
-    traits.extend(["Darkvision (60ft)", "Light Sleeper", "Mouse's Agility", "Mousefolk Senses", "Mouse's Survival"]) # I will be ediditing some of these for my campaign as they aren't well balanced
-    
-if race == "Orc":
-    attr_str = stat_increase(attr_str, 2)
-    attr_con = stat_increase(attr_con, 1)
-    attr_int = stat_decrease(attr_int, 2)
-    age = normal(12,30)
-    size_mod = normal(2,16)
-    height = 5 * 12 + 4 + size_mod
-    weight = 175 + size_mod * normal(2,12)
-    eyes = "Red"
-    skin = ["Greenish Grey", "Light Grey", "Dark Grey"]
-    skin = random.choice(skin)
-    hair = "Black"
-    speed = 30
-    traits.extend(["Darkvision (60ft)", "Aggressive", "Powerful Build"])
-    skill_profs.extend(["Intimidation"])
-    
-if race == "Succubus": # Extra class I found https://www.dndbeyond.com/races/1524-succubus
-    attr_cha = stat_increase(attr_cha, 1)
-    age = normal(20,1000)
-    size_mod = normal(2,20)
-    height = 4 * 12 + 8 + size_mod
-    weight = 110 + size_mod * normal(2,8)
-    eyes = ["Glowing Red", "Glowing Blue", "Glowing Brown", "Glowing Green"]
-    eyes = random.choice(eyes)
-    skin = ["Tan", "Olive", "White"]
-    skin = random.choice(skin)
-    hair = ["Black", "Red"]
-    hair = random.choice(hair)
-    speed = 30
-    skill_profs.extend(["Persuasion"])
-    traits.extend(["Charm", "Darkvision (60ft)", "Fiendish Nature", "Shapechanger", "Small Wings"]) # I might switch some of these around with playtesting
-    vulnerabilities.extend(["Radiant"])
-
-if race == "Tabaxi":
-    attr_dex = stat_increase(attr_dex, 2)
-    attr_cha = stat_increase(attr_cha, 1)
-    age = normal(20,60)
-    size_mod = normal(2,20)
-    height = 4 * 12 + 10 + size_mod
-    weight = 90 + size_mod * normal(2,8)
-    eyes = ["Green", "Yellow"]
-    eyes = random.choice(eyes)
-    skin = "Pink"
-    hair = ["Yelow", "Spotted Yellow", "Orange", "Spotted Orange", "Red", "Spotted Red"]
-    hair = random.choice(hair)
-    speed = 30
-    traits.extend(["Darkvision (60ft)", "Feline Agility", "Cat Claws"])
-    skill_profs.extend(["Perception", "Stealth"])
-    
-if race == "Tiefling":
-    subrace = ["Asmodeus", "Baalzebul", "Devil's Tongue", "Dispater", "Feral", "Fierna", "Glasya", "Hellfire", "Levistus", "Mammon", "Mephistopheles", "Zariel"]
-    subrace = random.choice(subrace)
-    if subrace == "Asmodeus" or subrace == "Baalzebul" or subrace == "Devil's Tongue" or subrace == "Hellfire" or subrace == "Mammon" or subrace == "Mephistopheles":
-        attr_cha = stat_increase(attr_cha, 2)
-        attr_int = stat_increase(attr_int, 1)
-    if subrace == "Dispater" or subrace == "Glasya":
-        attr_cha = stat_increase(attr_cha, 2)
-        attr_dex = stat_increase(attr_dex, 1)
-    if subrace == "Feral":
-        attr_dex = stat_increase(attr_dex, 2)
-        attr_int = stat_increase(attr_int, 1)
-    if subrace == "Fierna":
-        attr_cha = stat_increase(attr_cha, 2)
-        attr_wis = stat_increase(attr_wis, 1)
-    if subrace == "Livistus":
-        attr_cha = stat_increase(attr_cha, 2)
-        attr_con = stat_increase(attr_con, 1)
-    if subrace == "Zariel":
-        attr_cha = stat_increase(attr_cha, 2)
-        attr_str = stat_increase(attr_str, 1)
-    age = normal(20,60)
-    size_mod = normal(2,16)
-    height = 4 * 12 + 9 + size_mod
-    weight = 110 + size_mod * normal(2,8)
-    eyes = ["Solid Orb of Red", "Solid Orb of Black", "Solid Orb of White", "Solid Orb of Silver", "Solid Orb of Gold"]
-    eyes = random.choice(eyes)
+    size = Sizes.MEDIUM
+    eyes = ["Solid Orbs of Red", "Solid Orbs of Black", "Solid Orbs of White", "Solid Orbs of Silver", "Solid Orbs of Gold"]
     skin = ["Light/Pale White", "White/Fair", "Lightly Tanned", "Medium/Tanned", "Olive/Moderate Brown", "Brown", "Dark Brown", "Very Dark Brown/Black", "Light Red", "Maroon", "Burgundy", "Dark Red", "Red"]
-    skin = random.choice(skin)
     hair = ["Red", "Brown", "Black", "Dark Blue", "Purple"]
-    hair = random.choice(hair)
-    speed = 30
-    traits.extend(["Darkvision (60ft)"])
-    resistances.extend(["Fire"])
-    if subrace == "Asmodeus" or subrace == "Feral":
-        traits.extend(["Infernal Legacy"])
-    if subrace == "Baalzebul":
-        traits.extend(["Legacy of Maladomini"])
-    if subrace == "Devil's Tongue":
-        traits.extend(["Devil's Tongue"])
-    if subrace == "Dispater":
-        traits.extend(["Legacy of Dis"])
-    if subrace == "Fierna":
-        traits.extend(["Legacy of Phlegethos"])
-    if subrace == "Glasya":
-        traits.extend(["Legacy of Malbolge"])
-    if subrace == "Hellfire":
-        traits.extend(["Hellfire"])
-    if subrace == "Levistus":
-        traits.extend(["Legacy of Stygia"])
-    if subrace == "Mammon":
-        traits.extend(["Legacy of Minauros"])
-    if subrace == "Mephistopheles":
-        traits.extend(["Legacy of Cania"])
-    if subrace == "Zariel":
-        traits.extend(["Legacy of Avernus"])
-    
-if race == "Tortle":
-    attr_str = stat_increase(attr_str, 2)
-    attr_wis = stat_increase(attr_wis, 1)
-    age = normal(30,320)
-    size_mod = normal(2,20)
-    height = 4 * 12 + 8 + size_mod
-    weight = 350 + size_mod * normal(2,12)
-    eyes = ["Yellow", "Green", "Red", "Orange", "Brown", "Brownish Yellow"]
-    eyes = random.choice(eyes)
-    skin = ["Olive Green", "Blueish Green"]
-    skin = random.choice(skin)
-    hair = "N/A"
-    speed = 25
-    skill_profs.extend(["Survival"])
-    traits.extend(["Claws", "Hold Breath", "Natural Armour", "Shell Defense"])
-    
-if race == "Triton":
-    attr_str = stat_increase(attr_str, 1)
-    attr_con = stat_increase(attr_con, 1)
-    attr_cha = stat_increase(attr_cha, 1)
-    age = normal(15,170)
-    size_mod = normal(2,20)
-    height = 4 * 12 + 6 + size_mod
-    weight = 90 + size_mod * normal(2,8)
-    eyes = ["Brown", "Hazel", "Blue", "Green", "Grey", "Amber"]
-    eyes = random.choice(eyes)
-    skin = ["Silver", "Blueish Silver"]
-    skin = random.choice(skin)
-    hair = ["Deep Blue", "Greenish Blue", "Green"]
-    hair = random.choice(hair)
-    speed = 30
-    traits.extend(["Amphibious", "Control Air and Water", "Emissary of the Sea", "Guardians of the Depths"])
-    
-if race == "Yuan-Ti Pureblood":
-    attr_cha = stat_increase(attr_cha, 2)
-    attr_int = stat_increase(attr_int, 1)
-    age = normal(20,60)
-    size_mod = normal(2,20)
-    height = 4 * 12 + 8 + size_mod
-    weight = 110 + size_mod * normal(2,8)
-    eyes = ["Red", "Orange", "Silver", "Copper", "Green", "Yellow"]
-    eyes = random.choice(eyes)
-    skin = ["Light/Pale White", "White/Fair", "Lightly Tanned", "Medium/Tanned", "Olive/Moderate Brown", "Brown", "Dark Brown", "Very Dark Brown/Black"]
-    skin = random.choice(skin)
-    hair = ["Black", "Brown", "Blonde", "Red", "White"]
-    hair = random.choice(hair)
-    speed = 30
-    immunities.extend(["Poison", "Poisoned"])
-    traits.extend(["Darkvision (60ft)", "Innate Spellcasting", "Magic Resistance"])
-    
-STRMOD = stat_mod(str)
-DEXMOD = stat_mod(dex)
-CONMOD = stat_mod(con)
-INTMOD = stat_mod(int)
-WISMOD = stat_mod(wis)
-CHAMOD = stat_mod(cha)
+    traits = [Trait.DARKVISION60, Trait.INFERNAL_LEGACY]
+    resistances = [DamageType.FIRE]
+    languages = [Languages.COMMON, ExoticLanguages.INFERNAL]
+  
+str_mod = stat_mod(attr_str)
+dex_mod = stat_mod(attr_dex)
+con_mod = stat_mod(attr_con)
+int_mod = stat_mod(attr_int)
+wis_mod = stat_mod(attr_wis)
+cha_mod = stat_mod(attr_cha)
 
-# Alchemist, Artificer, Blood Hunter, Cardcaster, Diabolist, Feywalker, Morph, Occultist temporarily removed
-character_class = ["Barbarian", "Bard", "Cleric", "Druid", "Fighter", "Monk", "Paladin", "Ranger", "Rogue", "Sorcerer", "Warlock", "Wizard"]
-character_class = random.choice(character_class)
 
-# =============================================================================
-# if Class == "Alchemist":
-# =============================================================================
-    
-# =============================================================================
-# if Class == "Artificer":
-# =============================================================================
+class CharacterClass:
+    # TODO traits in class specifics, many bits are level gaited. Example commented into Barbarian
+    armour_profs: list[ArmourTypes] = []
+    equipment: list[str] = []
+    saving_throw_profs: list[Attributes] = []
+    subclasses: list[str] = []
+    available_skill_profs: list[Skills] = []
+    tool_profs: list[AllTools] = []
+    weapon_profs: list[WeaponTypes | Weapons] = []
 
-if character_class == "Barbarian":
-    if level >= 3:
-        subclass = ["Path of the Ancestral Guardian", "Path of the Battlerager", "Path of the Berserker", "Path of the Storm Herald", "Path of the Totem Warrior", "Path of the Zealot"]
-        subclass = random.choice(subclass)
-    hp = hp + hitpoints(12)
-    armour_profs.extend(["Light Armour", "Medium Armour", "Shields"])
-    weapon_profs.extend(["Simple Weapons", "Martial Weapons"])
-    saving_throw_profs.extend(["STR", "CON"])
-    skill_profs.extend(random.sample(["Animal Handling", "Athletics", "Intimidation", "Nature", "Perception", "Survival"], 2))
-    equipment.extend([random.choice(["Greataxe", random.choice(martial_melee)]), random.choice(["Two Handaxes", random.choice(simple_weapons)]), "Explorer's Pack", "Four Javelins"])
-    
-if character_class == "Bard":
-    if level >= 3:
-        subclass = ["College of Glamour", "College of Lore", "College of Satire", "College of Swords", "College of Valor", "College of Whispers"]
-        subclass = random.choice(subclass)
-    hp = hp + hitpoints(8)
-    armour_profs.extend(["Light Armour"])
-    weapon_profs.extend(["Simple Weapons", "Hand Crossbows", "Longswords", "Rapiers", "Shortswords"])
-    tool_profs.extend(random.sample(musical_instruments, 3))
-    saving_throw_profs.extend(["DEX", "CHA"])
-    skill_profs.extend(random.sample(skills, 3))
-    equipment.extend([random.choice(["Rapier", "Longsword", random.choice(simple_weapons)]), random.choice(["Diplomat's Pack", "Entertainer's Pack"]), random.choice(["Lute", random.choice(musical_instruments)]), "Leather Armour", "Dagger"])
-    
-# =============================================================================
-# if Class == "Blood Hunter":
-# =============================================================================
+    hit_die = 0
+    skill_prof_count = 1
 
-# =============================================================================
-# if Class == "Cardcaster":
-# =============================================================================
+    def __init__(self):
+        pass
+
+    def define_subclass(self):
+        self.subclass = random.choice(self.subclasses or ["None"])
+
+class FightingClass(CharacterClass):
+    fighting_styles: list[str] = []
     
-if character_class == "Cleric":
-    subclass = ["Arcana Domain", "Ambition Domain", "City Domain", "Death Domain", "Forge Domain", "Grave Domain", "Knowledge Domain", "Life Domain", "Light Domain", "Nature Domain", "Order Domain", "Protection Domain", "Solidarity Domain", "Strength Domain", "Tempest Domain", "Trickery Domain", "War Domain", "Zeal Domain"]
-    subclass = random.choice(subclass)
-    hp = hp + hitpoints(8)
-    armour_profs.extend(["Light Armour", "Medium Armour", "Shields"])
-    weapon_profs.extend(["Simple Weapons"])
-    saving_throw_profs.extend(["WIS", "CHA"])
-    skill_profs.extend(random.sample(["History", "Insight", "Medicine", "Persuasion", "Religion"], 2))
-    if "Warhammer" in weapon_profs or "Martial Weapons" in weapon_profs:
-        equipment.extend([random.choice(["Mace", "Warhammer"])])
-    else:
-        equipment.extend(["Mace"])
-    if "Chain Mail" in armour_profs or "Heavy Armour" in armour_profs:
-        equipment.extend([random.choice(["Scale Mail", "Leather Armour", "Chain Mail"])])
-    else:
-        equipment.extend([random.choice(["Scale Mail", "Leather Armour"])])
-    equipment.extend([random.choice(["Light Crossbow with 20 Bolts", random.choice(simple_weapons)]), random.choice(["Priest's Pack", "Explorer's Pack"]), "Shield", "Holy Symbol"])
+    def define_fighting_style(self):
+        self.fighting_style = random.choice(self.fighting_styles)
+
+### CLASS DEFINITIONS ###
+
+class Barbarian(CharacterClass):
+    hit_die = 12
+    # Subclass at Level 3, officially called "Primal Path"
+    # Base Rules = Berserker, Totem Warior
+    # The rest are official, but paywalled
+    subclasses = ["Path of the Ancestral Guardian", "Path of the Battlerager", "Path of the Beast", "Path of the Berserker", "Path of the Giant", "Path of the Storm Herald", "Path of the Totem Warrior", "Path of Wild Magic", "Path of the Zealot"]
+    armour_profs = [ArmourTypes.LIGHT, ArmourTypes.MEDIUM, ArmourTypes.SHIELD]
+    weapon_profs = list(WeaponTypes)
+    saving_throw_profs = [Attributes.STR, Attributes.CON]
+    available_skill_profs = [Skills.ANIMAL_HANDLING, Skills.ATHLETICS, Skills.INTIMIDATION, Skills.NATURE, Skills.PERCEPTION, Skills.SURVIVAL]
+    skill_prof_count = 2
+    # TRAITS = [(NAME, LEVEL OF UNLOCK, SOURCE=base class)] #Note the Primal Path Traits depend on subclass
+    # traits = [("Rage", 1), ("Unarmoured Defense", 1), ("Danger Sense", 2), ("Reckless Attack", 2), ("Primal Path Trait I", 3, subclass), ("Primal Knowledge", 3), ("Extra Attack", 5), ("Fast Movement", 5), ("Feral Instinct", 7),
+    #           ("Primal Path Trait II", 6, subclass), ("Brutal Critical", 9), ("Primal Path Trait III", 10, subclass), ("Relentless Rage", 11), ("Primal Path Trait IV", 14, subclass), ("Persistent Rage", 15), ("Indomitable Might", 18),
+    #           ("Primal Champion", 20)]
+    # TODO: equipment from [random.choice(["Greataxe", random.choice(martial_melee)]), random.choice(["Two Handaxes", random.choice(simple_weapons)]), "Explorer's Pack", "Four Javelins"]
+
+class Bard(CharacterClass): #subclass lvl 3
+    hit_die = 8
+    # Subclass at Level 3, officially called "Bard College"
+    # Base Rules = Lore, Valor
+    subclasses = ["College of Creation", "College of Eloquence", "College of Glamour", "College of Lore", "College of Spirits", "College of Swords", "College of Valor", "College of Whispers"]
+    armour_profs = [ArmourTypes.LIGHT]
+    weapon_profs = [WeaponTypes.SIMPLE_WEAPONS, Weapons.HAND_CROSSBOW, Weapons.LONGSWORD, Weapons.RAPIER, Weapons.SHORTSWORD]
+    saving_throw_profs = [Attributes.DEX, Attributes.CHA]
+    available_skill_profs = list(Skills)
+    skill_prof_count = 3
+    # TODO: Equipment from [random.choice(["Rapier", "Longsword", random.choice(simple_weapons)]), random.choice(["Diplomat's Pack", "Entertainer's Pack"]), random.choice(["Lute", random.choice(musical_instruments)]), "Leather Armour", "Dagger"]
+    def __init__(self):
+        super().__init__()
+        self.tool_profs = [random.sample(list(MusicalInstruments), 3)]
     
-# =============================================================================
-# if Class == "Diabolist":
-# =============================================================================
+class Cleric(CharacterClass): #TODO NOT DONE
+    hit_die = 8
+    # Subclass at Level 1, officially called "Divine Domain"
+    # Base Rules = Knowledge, Life, Light, Nature, Tempest, Trickery, War
+    subclasses = ["Arcana Domain", "Death Domain", "Forge Domain", "Grave Domain", "Knowledge Domain", "Life Domain", "Light Domain", "Nature Domain", "Order Domain", "Peace Domain", "Tempest Domain", "Trickery Domain", "Twilight Domain", "War Domain"]
+    armour_profs = [ArmourTypes.LIGHT, ArmourTypes.MEDIUM, ArmourTypes.SHIELD]
+    weapon_profs = [WeaponTypes.SIMPLE_WEAPONS]
+    saving_throw_profs = [Attributes.WIS, Attributes.CHA]
+    available_skill_profs = [Skills.HISTORY, Skills.INSIGHT, Skills.MEDICINE, Skills.PERSUASION, Skills.RELIGION]
+    skill_prof_count = 2
+    # TODO Figure out the below legacy bits, including equipment
+    # if "Warhammer" in weapon_profs or "Martial Weapons" in weapon_profs:
+    #     equipment.extend([random.choice(["Mace", "Warhammer"])])
+    # else:
+    #     equipment.extend(["Mace"])
+    # if "Chain Mail" in armour_profs or "Heavy Armour" in armour_profs:
+    #     equipment.extend([random.choice(["Scale Mail", "Leather Armour", "Chain Mail"])])
+    # else:
+    #     equipment.extend([random.choice(["Scale Mail", "Leather Armour"])])
+    #equipment.extend([random.choice(["Light Crossbow with 20 Bolts", random.choice(simple_weapons)]), random.choice(["Priest's Pack", "Explorer's Pack"]), "Shield", "Holy Symbol"])
     
-if character_class == "Druid":
-    if level >= 2:
-        subclass = ["Circle of Dreams", "Circle of the Land", "Circle of the Moon", "Circle of the Shepherd", "Circle of Spores", "Circle of Twilight"]
-        subclass = random.choice(subclass)
-        if subclass == "Circle of the Land":
+class Druid(CharacterClass):
+    hit_die = 8
+    # Subclass at Level 2, officially called "Druid Circle"
+    # Base Rules = Land, Moon
+    subclasses = ["Circle of Dreams", "Circle of the Land", "Circle of the Moon", "Circle of the Shepherd", "Circle of Spores", "Circle of Stars", "Circle of Wildfire"]
+    armour_profs = [ArmourTypes.LIGHT, ArmourTypes.MEDIUM, ArmourTypes.SHIELD]
+    weapon_profs = [Weapons.CLUB, Weapons.DAGGER, Weapons.DART, Weapons.JAVELIN, Weapons.MACE, Weapons.QUARTERSTAFF, Weapons.SCIMITAR, Weapons.SICKLE, Weapons.SLING, Weapons.SPEAR]
+    tool_profs = [Tools.HERBALIST]
+    saving_throw_profs = [Attributes.INT, Attributes.WIS]
+    available_skill_profs = [Skills.ANIMAL_HANDLING, Skills.ARCANA, Skills.INSIGHT, Skills.MEDICINE, Skills.NATURE, Skills.PERCEPTION, Skills.RELIGION, Skills.SURVIVAL]
+    skill_prof_count = 2
+    equipment = [] # mega TODO from [random.choice(["Wooden Shield", random.choice(simple_weapons)]), random.choice(["Scimitar", random.choice(simple_melee)]), "Leather Armour", "Explorer's Pack", "Druidic Focus"]
+    def __init__(self):
+        super().__init__()
+
+    def define_subclass(self):
+        super().define_subclass()
+        if self.subclass == "Circle of the Land":
             land = random.choice(["(Arctic)", "(Coast)", "(Desert)", "(Forest)", "(Grassland)", "(Mountain)", "(Swamp)", "(Underdark)"])
-            subclass = "Circle of the Land " + land
-    hp = hp + hitpoints(8)
-    armour_profs.extend(["Light Armour", "Medium Armour", "Shields"])
-    weapon_profs.extend(["Clubs", "Daggers", "Darts", "Javelins", "Maces", "Quarterstaffs", "Scimitars", "Sickles", "Slings", "Spears"])
-    tool_profs.extend(["Herbalism Kit"])
-    saving_throw_profs.extend(["INT", "WIS"])
-    skill_profs.extend(random.sample(["Arcana", "Animal Handling", "Insight", "Medicine", "Nature", "Perception", "Religion", "Survival"], 2))
-    equipment.extend([random.choice(["Wooden Shield", random.choice(simple_weapons)]), random.choice(["Scimitar", random.choice(simple_melee)]), "Leather Armour", "Explorer's Pack", "Druidic Focus"])
+            self.subclass = "Circle of the Land " + land
     
-# =============================================================================
-# if Class == "Feywalker":
-# =============================================================================
-    
-if character_class == "Fighter":
-    fighting_style = ["Archery", "Defense", "Dueling", "Great Weapon Fighting", "Protection", "Two-Weapon Fighting"]
-    fighting_style = random.choice(fighting_style)
-    if level >= 3:
-        subclass = ["Arcane Archer", "Battle Master", "Brute", "Cavalier", "Champion", "Eldritch Knight", "Purple Dragon Knight", "Samurai", "Scout", "Sharpshooter"]
-        subclass = random.choice(subclass)
-    hp = hp + hitpoints(10)
-    armour_profs.extend(["Light Armour, Medium Armour, Heavy Armour", "Shields"])
-    weapon_profs.extend(["Simple Weapons", "Martial Weapons"])
-    saving_throw_profs.extend(["STR", "CON"])
-    skill_profs.extend(random.sample(["Acrobatics", "Animal Handling", "Athletics", "History", "Insight", "Intimidation", "Perception", "Survival"], 2))
-# =============================================================================
-#   This whole equipment section got messed up because one choice of equipment gives multiple items, which gives my code lists within lists. My print functions don't work with lists within lists. I'm looking for a way to simplify this. Similar issue encountered with Paladin and Ranger
-# =============================================================================
-    EqptExtnd = [random.choice(["Light Crossbow with 20 Bolts", "Two Handaxes"]), random.choice(["Dungeoneer's Pack", "Explorer's Pack"])]
-    EqptExtnd.extend(random.choice([["Chain Mail"], ["Leather Armour", "Longbow with 20 Arrows"]]))
-    EqptExtnd.extend(random.choice([[random.choice(martial_weapons), "Shield"], random.sample(martial_weapons, 2)]))
-    equipment.extend(EqptExtnd)
-    
-if character_class == "Monk":
-    if level >= 3:
-        subclass = ["Way of the Drunken Master", "Way of the Four Elements", "Way of the Kensei", "Way of the Long Death", "Way of the Open Hand", "Way of Shadow", "Way of the Sun Soul", "Way of Tranquility"]
-        subclass = random.choice(subclass)
-    hp = hp + hitpoints(8)
-    weapon_profs.extend(["Simple Weapons", "Shortswords"])
-    tool_profs.extend([random.choice([random.choice(musical_instruments), random.choice(artisan_tools)])])
-    saving_throw_profs.extend(["STR", "DEX"])
-    skill_profs.extend(random.sample(["Acrobatics", "Athletics", "History", "Insight", "Religion", "Stealth"], 2))
-    equipment.extend([random.choice(["Shortsword", random.choice(simple_weapons)]), random.choice(["Dungeoneer's Pack", "Explorer's Pack"]), "10 Darts"])
-    
-# =============================================================================
-# if Class == "Morph":
-# =============================================================================
-    
-# =============================================================================
-# if Class == "Occultist":
-# =============================================================================
-    
-if character_class == "Paladin":
-    if level >= 2:
-        fighting_style = ["Defense", "Dueling", "Great Weapon Fighting", "Protection"]
-        fighting_style = random.choice(fighting_style)
-    if level >= 3:
-        subclass = ["Oath of the Ancients", "Oath of Conquests", "Oath of the Crown", "Oath of Devotion", "Oath of Redemption", "Oath of Vengeance", "Oathbreaker", "Oath of Treachery"]
-        subclass = random.choice(subclass)
-    hp = hp + hitpoints(10)
-    armour_profs.extend(["Light Armour", "Medium Armour", "Heavy Armour", "Shields"])
-    weapon_profs.extend(["Simple Weapons", "Martial Weapons"])
-    saving_throw_profs.extend(["WIS", "CHA"])
-    skill_profs.extend(random.sample(["Athletics", "Insight", "Intimidation", "Medicine", "Persuasion", "Religion"], 2))
-    EqptExtnd = random.choice([[random.choice(martial_weapons), "Shield"], random.sample(martial_weapons, 2)])
-    EqptExtnd.extend([random.choice(["5 Javelins", random.choice(simple_melee)])])
-    EqptExtnd.extend(["Chain Mail", "Holy Symbol"])
-    equipment.extend(EqptExtnd)
-    
-if character_class == "Ranger":
-    if level >= 2:
-        fighting_style = ["Archery", "Defense", "Dueling", "Two-Weapon Fighting"]
-        fighting_style = random.choice(fighting_style)
-    if level >= 3:
-        subclass = ["Beast Master", "Gloom Stalker", "Horizon Walker", "Hunter", "Monster Slayer", "Primeval Guardian"]
-        subclass = random.choice(subclass)
-    hp = hp + hitpoints(10)
-    armour_profs.extend(["Light Armour", "Medium Armour", "Shields"])
-    weapon_profs.extend(["Simple Weapons", "Martial Weapons"])
-    saving_throw_profs.extend(["STR", "DEX"])
-    skill_profs.extend(random.sample(["Animal Handling", "Athletics", "Insight", "Investigation", "Nature", "Perception", "Stealth", "Survival"], 3))
-    EqptExtnd =[random.choice(["Scale Mail", "Leather Armour"])]
-    EqptExtnd.extend(random.choice([["Two Shortswords"], random.sample(simple_melee, 2)]))
-    EqptExtnd.extend([random.choice(["Dungeoneer's Pack", "Explorer's Pack"])])
-    EqptExtnd.extend(["Longbow with 20 Arrows"])
-    equipment.extend(EqptExtnd)
-    
-if character_class == "Rogue":
-    if level >= 3:
-        subclass = ["Arcane Trickster", "Assassin", "Inquisitive", "Mastermind", "Scout", "Swashbuckler", "Thief"]
-        subclass = random.choice(subclass)
-    hp = hp + hitpoints(8)
-    armour_profs.extend(["Light Armour"])
-    weapon_profs.extend(["Simple Weapons", "Hand Crossbows", "Longswords", "Rapiers", "Shortswords"])
-    tool_profs.extend(["Thieves' Tools"])
-    saving_throw_profs.extend(["DEX", "INT"])
-    skill_profs.extend(random.sample(["Acrobatics", "Athletics", "Deception", "Insight", "Intimidation", "Investigation", "Perception", "Performance", "Persuasion", "Sleight of Hand", "Stealth"], 4))
-    equipment.extend([random.choice(["Rapier", "Shortsword"]), random.choice(["Shortbow with 20 Arrows", "Shortsword"]), random.choice(["Burglar's Pack", "Dungeoneer's Pack", "Explorer's Pack"]), "Leather Armour", "Two Daggers", "Thieves's Tools"])
-    
-if character_class == "Sorcerer":
-    subclass = ["Divine Soul", "Draconic Bloodline", "Giant Soul", "Pheonix Sorcery", "Pyromancer", "Sea Sorcery", "Shadow Magic", "Stone Soercery", "Storm Sorcery", "Wild Magic"]
-    subclass = random.choice(subclass)
-    hp = hp + hitpoints(6)
-    weapon_profs.extend(["Daggers", "Darts", "Slings", "Quarterstaffs", "Light Crossbows"])
-    saving_throw_profs.extend(["CON", "CHA"])
-    skill_profs.extend(random.sample(["Arcana", "Deception", "Insight", "Intimidation", "Persuasion", "Religion"], 2))
-    equipment.extend([random.choice(["Light Crossbow with 20 Bolts", random.choice(simple_weapons)]), random.choice(["Component Pouch", "Arcane Focus"]), random.choice(["Dungeoneer's Pack", "Explorer's Pack"]), "Two Daggers"])
-    
-if character_class == "Warlock":
-    subclass = ["The Archfey", "The Celestial", "The Fiend", "The Ghost in the Machine", "The Great Old One", "The Hexblade", "The Raven Queen", "The Seeker", "The Undying"]
-    subclass = random.choice(subclass)
-    if level >= 3:
-        fighting_style = ["Pact of the Chain", "Pact of the Blade", "Pact of the Tome"]
-        fighting_style = random.choice(fighting_style)
-    hp = hp + hitpoints(8)
-    armour_profs.extend(["Light Armour"])
-    weapon_profs.extend(["Simple Weapons"])
-    saving_throw_profs.extend(["WIS", "CHA"])
-    skill_profs.extend(random.sample(["Arcana", "Deception", "History", "Intimidation", "Investigation", "Nature", "Religion"], 2))
-    equipment.extend([random.choice(["Light Crossbow with 20 Bolts", random.choice(simple_weapons)]), random.choice(["Component Pouch", "Arcane Focus"]), random.choice(["Scholar's Pack", "Dungeoneer's Pack"]), "Leather Armour", random.choice(simple_weapons), "Two Daggers"])
-    
-if character_class == "Wizard":
-    if level >= 2:
-        subclass = ["Artificier", "Bladesinger", "Lore Mastery", "School of Abjuration", "School of Conjuration", "School of Divination", "School of Enchantment", "School of Evocation", "School of Illusion", "School of Invention", "School of Necromancy", "School of Transmutation", "Technomancy", "Theurgy", "War Magic"]
-        subclass = random.choice(subclass)
-    hp = hp + hitpoints(6)
-    weapon_profs.extend(["Daggers", "Darts", "Slings", "Quarterstaffs", "Light Crossbows"])
-    saving_throw_profs.extend(["INT", "WIS"])
-    skill_profs.extend(random.sample(["Arcana", "History", "Insight", "Investigation", "Medicine", "Religion"], 2))
-    equipment.extend([random.choice(["Quarterstaff", "Dagger"]), random.choice(["Component Pouch", "Arcane Focus"]), random.choice(["Scholar's Pack", "Explorer's Pack"]), "Spellbook"])
+class Fighter(FightingClass):
+    hit_die = 10
+    # Base Rules = Archery, Defense, Dueling, Great Weapon Fighting, Protection, Two-Weapon Fighting
+    fighting_styles = ["Archery", "Blind Fighting", "Defense", "Dueling", "Great Weapon Fighting", "Interception", "Protection", "Superior Technique", "Thrown Weapon Fighting", "Two-Weapon Fighting", "Unarmed Fighting"]
+    # Sublass at Level 3, officially called "Martial Archetype"
+    # Base Rules = Battle Master, Champion, Eldritch Knight
+    subclasses = ["Arcane Archer", "Banneret", "Battle Master", "Cavalier", "Champion", "Echo Knight", "Eldritch Knight", "Psi Warrior", "Rune Knight", "Samurai"]
+    armour_profs = list(ArmourTypes)
+    weapon_profs = list(WeaponTypes)
+    saving_throw_profs = [Attributes.STR, Attributes.CON]
+    available_skill_profs = [Skills.ACROBATICS, Skills.ANIMAL_HANDLING, Skills.ATHLETICS, Skills.HISTORY, Skills.INSIGHT, Skills.INTIMIDATION, Skills.PERCEPTION, Skills.SURVIVAL]
+    skill_prof_count = 2
+    equipment = [] # mega TODO
+    # EqptExtnd = [random.choice(["Light Crossbow with 20 Bolts", "Two Handaxes"]), random.choice(["Dungeoneer's Pack", "Explorer's Pack"])]
+    # EqptExtnd.extend(random.choice([["Chain Mail"], ["Leather Armour", "Longbow with 20 Arrows"]]))
+    # EqptExtnd.extend(random.choice([[random.choice(martial_weapons), "Shield"], random.sample(martial_weapons, 2)]))
+    # equipment.extend(EqptExtnd)
 
-# Currently Removed: "Dissenter"
-background = ["Acolyte", "Anthropologist", "Archaeologist", "Black Fist Double Agent", "Caravan Specialist", "Charlatan", "City Watch", "Clan Crafter", "Cloistered Scholar", "Courtier", "Criminal", "Dragon Casualty", "Earthspur Miner", "Entertainer", "Faction Agent", "Far Traveller", "Folk Hero", "Gate Urchin", "Guild Artisan", "Harborfolk", "Haunted One", "Hermit", "Hillsfar Merchant", "Hillsfar Smuggler", "House Agent", "Inheritor", "Initiate", "Inquisitor", "Iron Route Bandit", "Knight of the Order", "Mercenary Veteran", "Mulmaster Aristocrat", "Noble", "Outlander", "Phlan Insurgent", "Phlan Refugee", "Sage", "Sailor", "Secret Identity", "Shade Fanatic", "Soldier", "Stojanow Prisoner", "Ticklebelly Nomad", "Trade Sheriff", "Urban Bounty Hunter", "Urchin", "Uthgardt Tribe Member", "Vizier", "Waterdhavian Noble"]
-background = random.choice(background)
+class Monk(CharacterClass):
+    hit_die = 8
+    # Subclass at Level 3, officially called "Monastic Tradition"
+    # Base Rules = Four Elements, Open Hand, Shadow
+    subclasses = ["Way of the Astral Self", "Way of the Ascendant Dragon", "Way of the Drunken Master", "Way of the Four Elements", "Way of the Kensei", "Way of the Long Death", "Way of Mercy", "Way of the Open Hand", "Way of Shadow", "Way of the Sun Soul"]
+    weapon_profs = [WeaponTypes.SIMPLE_WEAPONS, Weapons.SHORTSWORD]
+    saving_throw_profs = [Attributes.STR, Attributes.DEX]
+    available_skill_profs = [Skills.ACROBATICS, Skills.ATHLETICS, Skills.HISTORY, Skills.INSIGHT, Skills.RELIGION, Skills.STEALTH]
+    skill_prof_count = 2
+    equipment = [] # mega TODO from [random.choice(["Shortsword", random.choice(simple_weapons)]), random.choice(["Dungeoneer's Pack", "Explorer's Pack"]), "10 Darts"]
 
-if background == "Acolyte":
-    skill_profs.extend(["Insight", "Religion"])
-    equipment.extend(["Holy Symbol", random.choice(["Prayer Book", "Prayer Wheel"]), "5 Sticks of Incense", "Vestments", "Common Clothes", "15 gp"])
+    def __init__(self):
+        super().__init__()
+        self.tool_profs = [random.choice(list(MusicalInstruments) + list(Tools))]
     
-if background == "Anthropologist":
-    skill_profs.extend(["Insight", "Religion"])
-    equipment.extend(["Leather-Bound Diary", "Bottle of Ink", "Ink Pen", "Set of Traveler's Clothes", "One Trinket of Special Significance", "10 gp"])
-    
-if background == "Archaeologist":
-    skill_profs.extend(["History", "Survival"])
-    tool_profs.extend([random.choice(["Cartographer's Tools", "Navigator's Tools"])])
-    equipment.extend([random.choice(["Wooden Case Containing a Map to a Ruin", "Wooden Case Containing a Map to a Dungeon"]), "Bullseye Lantern", "Miner's Pick", "Set of Traveler's Clothes", "Shovel", "Two-Person Tent", "Trinket Recovered from a Dig Site", "25 gp"])
+class Paladin(FightingClass):
+    hit_die = 10
+    # Fighting Style at Level 2
+    # Base Rules = Defense, Dueling, Great Weapon Fighting, Protection
+    fighting_style = ["Blessed Warrior", "Blind Fighting", "Defense", "Dueling", "Great Weapon Fighting", "Interception", "Protection"]
+    # Subclass at Level 3, officially called "Sacred Oath"
+    # Base Rules = Ancients, Devotion, Vengeance
+    subclasses = ["Oath of the Ancients", "Oath of Conquest", "Oath of the Crown", "Oath of Devotion", "Oath of Glory", "Oath of Redemption", "Oath of Vengeance", "Oath of the Watchers", "Oathbreaker"]
+    armour_profs = list(ArmourTypes)
+    weapon_profs = list(WeaponTypes)
+    saving_throw_profs = [Attributes.WIS, Attributes.CHA]
+    available_skill_profs = [Skills.ATHLETICS, Skills.INSIGHT, Skills.INTIMIDATION, Skills.MEDICINE, Skills.PERSUASION, Skills.RELIGION]
+    skill_prof_count = 2
+    equipment = [] # mega TODO
+    # EqptExtnd = random.choice([[random.choice(martial_weapons), "Shield"], random.sample(martial_weapons, 2)])
+    # EqptExtnd.extend([random.choice(["5 Javelins", random.choice(simple_melee)])])
+    # EqptExtnd.extend(["Chain Mail", "Holy Symbol"])
+    # equipment.extend(EqptExtnd)
 
-if background == "Black Fist Double Agent":
-    skill_profs.extend(["Deception", "Insight"])
-    black_fist_double_agent_tool = random.choice([random.choice(gaming_sets), random.choice(artisan_tools)])
-    tool_profs.extend(["Disguise Kit", black_fist_double_agent_tool])
-    equipment.extend(["Disguise Kit", "Common Clothes", "Tears of Virulence Emblem", "Writ of Free Agency Signed by the Lord Regent", black_fist_double_agent_tool, "15 gp"])
-    
-if background == "Caravan Specialist":
-    skill_profs.extend(["Animal Handling", "Survival"])
-    tool_profs.extend(["Land Vehicles"])
-    equipment.extend(["Whip", "Tent", "Regional Map", "Traveling Clothes", "10 gp"])
-    
-if background == "Charlatan":
-    skill_profs.extend(["Deception", "Sleight of Hand"])
-    tool_profs.extend(["Disguise Kit", "Forgery Kit"])
-    equipment.extend(["Fine Clothes", "Disguise Kit", random.choice(["Ten Stoppered Bottles Filled with Coloured Liquid", "Set of Weighted Dice", "Deck of Marked Cards", "Signet Ring of an Imaginary Duke"]), "15 gp"])
-    
-if background == "City Watch":
-    background = random.choice(["City Watch Patrol", "City Watch Investigator"])
-    skill_profs.extend(["Insight"])
-    if background == "City Watch Patrol":
-        skill_profs.extend(["Athletics"])
-    if background == "City Watch Investigator":
-        skill_profs.extend(["Investigation"])
-    equipment.extend(["Uniform in the Style of Your Unit and Indicative of Your Rank", "Horn with which to Summon Help", "Set of Manacles", "10 gp"])
-    
-if background == "Clan Crafter":
-    skill_profs.extend(["History", "Insight"])
-    clan_crafter_artisan_tools = random.choice(artisan_tools)
-    tool_profs.extend([clan_crafter_artisan_tools])
-    equipment.extend([clan_crafter_artisan_tools, "Maker's Mark Chisel", "Traveler's Clothes", "Gem Worth 10 gp", "5 gp"])
-    
-if background == "Cloistered Scholar":
-    skill_profs.extend(["History", random.choice(["Arcana", "Nature", "Religion"])])
-    equipment.extend(["Scholar's Robes of Your Cloister", "Writing Kit", "Borrowed Book on the Subject of Your Current Study", "10 gp"])
-    
-if background == "Cormanthor Refugee":
-    skill_profs.extend(["Nature", "Survival"])
-    cormantor_refugee_artisan_tools = random.choice(artisan_tools) # Introducing a temporary variable so the same artisan's tools will be included in the equipment and proficiencies
-    tool_profs.extend([cormantor_refugee_artisan_tools])
-    equipment.extend(["Two-Person Tent", cormantor_refugee_artisan_tools, "Holy Symbol", "Traveler's Clothes", "5 gp"])
-    
-if background == "Courtier":
-    skill_profs.extend(["Insight", "Persuasion"])
-    equipment.extend(["Set of Fine Clothes", "5 gp"])
-    
-if background == "Criminal":
-    specialty = ["Blackmailer", "Burglar", "Enforcer", "Fence", "Highway Robber", "Hired Killer", "Pickpocket", "Smuggler", "Spy"]
-    background = "Criminal " + random.choice(specialty)
-    skill_profs.extend(["Deception", "Stealth"])
-    tool_profs.extend([random.choice(gaming_sets), "Thieves' Tools"])
+class Ranger(FightingClass):
+    hit_die = 10
+    # Fighting Style at Level 2
+    # Base Rules = Archery, Defense, Dueling, Two-Weapon Fighting
+    fighting_style = ["Archery", "Blind Fighting", "Defense", "Druidic Warrior", "Dueling", "Thrown Weapon Fighting", "Two-Weapon Fighting"]
+    # Subclass at Level 3, officially called "Ranger Conclave"
+    # Base Rules = Beast Master, Hunter
+    subclasses = ["Beast Master", "Fey Wanderer", "Gloom Stalker", "Horizon Walker", "Hunter", "Monster Slayer", "Swarmkeeper", "Drakewarden"]
+    armour_profs = [ArmourTypes.LIGHT, ArmourTypes.MEDIUM, ArmourTypes.SHIELD]
+    weapon_profs = list(WeaponTypes)
+    saving_throw_profs = [Attributes.STR, Attributes.DEX]
+    available_skill_profs = [Skills.ANIMAL_HANDLING, Skills.ATHLETICS, Skills.INSIGHT, Skills.INVESTIGATION, Skills.NATURE, Skills.PERCEPTION, Skills.STEALTH, Skills.SURVIVAL]
+    skill_prof_count = 3
+    equipment = [] # mega TODO
+    # EqptExtnd =[random.choice(["Scale Mail", "Leather Armour"])]
+    # EqptExtnd.extend(random.choice([["Two Shortswords"], random.sample(simple_melee, 2)]))
+    # EqptExtnd.extend([random.choice(["Dungeoneer's Pack", "Explorer's Pack"])])
+    # EqptExtnd.extend(["Longbow with 20 Arrows"])
+    # equipment.extend(EqptExtnd)
 
-# =============================================================================
-# if Background == "Dissenter":  # Don't know what Dissenters get for proficiencies or equipment
-#     SkillProficiencies.extend([])
-# =============================================================================
-    
-if background == "Dragon Casualty": # Tool proficiency is based on origin
-    origin = random.choice(["Dockworker/Fisherman", "Tradesperson/Merchant", "Black Fist Soldier", "Adventurer", "Entertainer", "Scholar/Healer", "Criminal", "Unskilled Labourer"])
-    background = "Dragon Casualty who used to be a " + origin
-    if origin == "Dockworker/Fisherman":
-        tool_profs.extend(["Water Vehicles"])
-    if origin == "Tradesperson/Merchant":
-        tool_profs.extend([random.choice(artisan_tools)])
-    if origin == "Black Fist Soldier":
-        tool_profs.extend([random.choice([random.choice(artisan_tools), "Land Vehicles"])])
-    if origin == "Adventurer":
-        tool_profs.extend(["Land Vehicles"])
-    if origin == "Entertainer":
-        tool_profs.extend([random.choice(musical_instruments)])
-    if origin == "Scholar/Healer":
-        tool_profs.extend([random.choice(["Alchemist's Supplies", "Herbalism Kit"])])
-    if origin == "Criminal":
-        tool_profs.extend([random.choice(["Thieves' Tools", "Forgery Kit", "Disguise Kit"])])
-    if origin == "Unskilled Labourer":
-        tool_profs.extend([random.choice(gaming_sets)])
-    skill_profs.extend(["Intimidation", "Survival"])
-    equipment.extend(["Dagger", "Tattered Rags", "Loaf of Moldy Bread", "Small Cast-Off Scale Belonging to Vorgansharax - The Maimed Virulence", "5 gp"])
+class Rogue(CharacterClass):
+    hit_die = 8
+    # Subclass at Level 3, officially called "Roguish Archtype"
+    # Base Rules = Arcane Trickster, Assassin, Thief
+    subclasses = ["Arcane Trickster", "Assassin", "Inquisitive", "Mastermind", "Phantom", "Scout", "Soulknife", "Swashbuckler", "Thief"]
+    armour_profs = [ArmourTypes.LIGHT]
+    weapon_profs = [WeaponTypes.SIMPLE_WEAPONS, Weapons.HAND_CROSSBOW, Weapons.LONGSWORD, Weapons.RAPIER, Weapons.SHORTSWORD]
+    tool_profs = [Tools.THIEF]
+    saving_throw_profs = [Attributes.DEX, Attributes.INT]
+    available_skill_profs = [Skills.ACROBATICS, Skills.ATHLETICS, Skills.DECEPTION, Skills.INSIGHT, Skills.INTIMIDATION, Skills.INVESTIGATION, Skills.PERCEPTION, Skills.PERFORMANCE, Skills.PERSUASION, Skills.SLEIGHT_OF_HAND, Skills.STEALTH]
+    skill_prof_count = 4
+    equipment = [] # mega TODO [random.choice(["Rapier", "Shortsword"]), random.choice(["Shortbow with 20 Arrows", "Shortsword"]), random.choice(["Burglar's Pack", "Dungeoneer's Pack", "Explorer's Pack"]), "Leather Armour", "Two Daggers", "Thieves's Tools"]
 
-if background == "Earthspur Miner":
-    skill_profs.extend(["Athletics", "Survival"])
-    equipment.extend([random.choice(["Shovel", "Miner's Pick"]), "Block and Tackle", "Climber's Kit", "Set of Common Clothes", "5 gp"])
+class Sorcerer(CharacterClass):
+    hit_die = 6
+    # Subclass at Level 1, officially called "Sorcerous Origin"
+    # Base Rules = Draconic Bloodline, Wild Magic
+    subclasses = ["Aberrant Mind", "Clockwork Soul", "Divine Soul", "Draconic Bloodline", "Lunar Sorcery", "Shadow Magic", "Storm Sorcery", "Wild Magic"]
+    weapon_profs = [Weapons.DAGGER, Weapons.DART, Weapons.SLING, Weapons.QUARTERSTAFF, Weapons.LIGHT_CROSSBOW]
+    saving_throw_profs = [Attributes.CON, Attributes.CHA]
+    available_skill_profs = [Skills.ARCANA, Skills.DECEPTION, Skills.INSIGHT, Skills.INTIMIDATION, Skills.PERSUASION, Skills.RELIGION]
+    available_skill_profs = 2
+    equipment = [] # mega TODO [random.choice(["Light Crossbow with 20 Bolts", random.choice(simple_weapons)]), random.choice(["Component Pouch", "Arcane Focus"]), random.choice(["Dungeoneer's Pack", "Explorer's Pack"]), "Two Daggers"]
     
-if background == "Entertainer":
-    routine = random.sample(["an Actor", "a Dancer", "a Fire-Eater", "a Gladiator", "a Jester", "a Juggler", "an Instrumentalist", "a Poet", "a Singer", "a Storyteller", "a Tumbler"], 3) # The handbook says up to 3 routines, going with 3 to spice things up. Gladiator is also included in here for fun
-    background = "Entertainer who is " + ", and ".join(routine)
-    skill_profs.extend(["Acrobatics", "Performance"])
-    EntertainerMusicalInstrument = random.choice(musical_instruments)  # Introducing a temporary variable so the same instrument will be included in the equipment and proficiencies
-    tool_profs.extend(["Disguise Kit", EntertainerMusicalInstrument])
-    equipment.extend([EntertainerMusicalInstrument, random.choice(["Love Letter from an Admirer", "Lock of Hair from an Admirer", "Trinket from an Admirer"]), "Costume", "15 gp"])
-    if "a Gladiator" in routine:
-        GladiatorWeapon = random.choice(["Trident", "Net"])
-        weapon_profs.extend([GladiatorWeapon])
-        equipment.extend([GladiatorWeapon])
-    
-if background == "Faction Agent":
-    faction = random.choice(["The Emerald Enclave", "The Harpers", "The Lord's Alliance", "The Order of the Gauntlet", "The Zhentarim"])
-    background = "Faction Agent of " + faction
-    skill_profs.extend(["Insight"])
-    if faction == "The Emerald Enclave":
-        skill_profs.extend(["Nature"])
-    if faction == "The Harpers":
-        skill_profs.extend(["Investigation"])
-    if faction == "The Lord's Alliance":
-        skill_profs.extend(["History"])
-    if faction == "The Order of the Gauntlet":
-        skill_profs.extend(["Religion"])
-    if faction == "The Zhentarim":
-        skill_profs.extend(["Deception"])
-    equipment.extend([random.choice(["Badge of " + faction, "Emblem of " + faction]), "Set of Common Clothes", "15 gp"])
-    if faction == "The Harpers" or faction == "The Zhentarim":
-        equipment.extend(["Copy of a Code-Book from " + faction])
-    else: 
-        equipment.extend(["Copy of a Seminal Text from " + faction])
-    
-if background == "Far Traveler":
-    reason = random.choice(["Emissary", "Exile", "Fugitive", "Pilgrim", "Sightseer", "Wanderer"])
-    origin = random.choice(["Evermeet", "Halruaa", "Kara-Tur", "Mulhorand", "Sossal", "Zakhara", "The Underdark"])
-    background = "Far Traveler " + reason + " from " + origin
-    skill_profs.extend(["Insight", "Perception"])
-    far_traveler_tool = random.choice([random.choice(musical_instruments), random.choice(gaming_sets)])
-    tool_profs.extend([far_traveler_tool])
-    equipment.extend([far_traveler_tool, "Poorly Wrought Maps from " + origin, "Small Piece of Jewelry Worth 10 gp from " + origin, "5 gp"])
-    
-if background == "Folk Hero":
-    skill_profs.extend(["Animal Handling", "Survival"])
-    folk_hero_tools = random.choice(artisan_tools)
-    tool_profs.extend([folk_hero_tools, "Land Vehicles"])
-    equipment.extend([folk_hero_tools, "Shovel", "Iron Pot", "Set of Common Clothes", "10 gp"])
-    
-if background == "Gate Urchin":
-    skill_profs.extend(["Deception", "Sleight of Hand"])
-    gate_urchin_musical_instrument = random.choice(musical_instruments)
-    tool_profs.extend(["Thieves' Tools", gate_urchin_musical_instrument])
-    equipment.extend(["Battered Alms Box", gate_urchin_musical_instrument, random.choice(["Cast-Off Military Jacket", "Cast-Off Cap", "Cast-Off Scarf"]), "Set of Common Clothes", "10 gp"])
-    
-if background == "Guild Artisan":
-    skill_profs.extend(["Insight", "Persuasion"])
-    guild_artisan_tools = random.choice(artisan_tools)
-    tool_profs.extend([guild_artisan_tools])
-    equipment.extend([guild_artisan_tools, "Letter of Introduction from Your Guild", "15 gp"])
-    
-if background == "Harborfolk":
-    skill_profs.extend(["Athletics", "Sleight of Hand"])
-    harborfolk_gaming_set = random.choice(gaming_sets)
-    tool_profs.extend([harborfolk_gaming_set, "Water Vehicles"])
-    equipment.extend([harborfolk_gaming_set, "Fishing Tackle", "Set of Common Clothes", "Rowboat", "5 gp"])
-    
-if background == "Haunted One":
-    skill_profs.extend(random.choice(["Arcana", "Investigation", "Religion", "Survival"]))
-    equipment.extend(["Monster Hunter's Pack", "Gothic Trinket"])
+class Warlock(FightingClass):
+    hit_die = 8
+    # Subclass at Level 1, officially called "Otherworldly Patron"
+    # Base Rules = Archfey, Fiend, Great Old One
+    subclasses = ["The Archfey", "The Celestial", "The Fathomless", "The Fiend", "The Genie", "The Great Old One", "The Hexblade", "The Undead", "The Undying"]
+    # Fighting Style at Level 3, officially called "Pact Boon"
+    fighting_styles = ["Pact of the Blade", "Pact of the Chain", "Pact of the Tome", "Pact of the Talisman"]
+    armour_profs = [ArmourTypes.LIGHT]
+    weapon_profs = [WeaponTypes.SIMPLE_WEAPONS]
+    saving_throw_profs = [Attributes.WIS, Attributes.CHA]
+    available_skill_profs = [Skills.ARCANA, Skills.DECEPTION, Skills.HISTORY, Skills.INTIMIDATION, Skills.INVESTIGATION, Skills.NATURE, Skills.RELIGION]
+    equipment = [] # mega TODO [random.choice(["Light Crossbow with 20 Bolts", random.choice(simple_weapons)]), random.choice(["Component Pouch", "Arcane Focus"]), random.choice(["Scholar's Pack", "Dungeoneer's Pack"]), "Leather Armour", random.choice(simple_weapons), "Two Daggers"]
 
-if background == "Hermit":
-    skill_profs.extend(["Medicine", "Religion"])
-    tool_profs.extend(["Herbalism Kit"])
-    equipment.extend(["Scroll Case Stuffed Full of Notes from Your " + random.choice(["Prayers", "Studies"]), "Winter Blanket", "Set of Common Clothes", "Herbalism Kit", "5 gp"])
-    
-if background == "Hillsfar Merchant":
-    skill_profs.extend(["Insight", "Persuasion"])
-    tool_profs.extend(["Land Vehicles", "Water Vehicles"])
-    equipment.extend(["Set of Clothes", "Signet Ring", "Letter of Introduction from Your Family's Trading House", "25 gp"])
+class Wizard(CharacterClass):
+    hit_die = 6
+    # Sublass at Level 2, officially called "Arcane Tradition"
+    # Base Rules = Abjuration, Conjuration, Divination, Enchantment, Evocation, Illusion, Necromancy, Transmutation
+    subclasses = ["Abjuration", "Bladesinging", "Chronurgy", "Conjuration", "Divination", "Enchantment", "Evocation", "Graviturgy", "Illusion", "Necromancy", "Order of Scribes", "Transmutation", "War Magic"]
+    weapon_profs = [Weapons.DAGGER, Weapons.DART, Weapons.SLING, Weapons.QUARTERSTAFF, Weapons.LIGHT_CROSSBOW]
+    saving_throw_profs = [Attributes.INT, Attributes.WIS]
+    available_skill_profs = [Skills.ARCANA, Skills.HISTORY, Skills.INSIGHT, Skills.INVESTIGATION, Skills.MEDICINE, Skills.RELIGION]
+    skill_prof_count = 2
+    equipment = [] # mega TODO [random.choice(["Quarterstaff", "Dagger"]), random.choice(["Component Pouch", "Arcane Focus"]), random.choice(["Scholar's Pack", "Explorer's Pack"]), "Spellbook"]
 
-if background == "Hillsfar Smuggler":
-    skill_profs.extend(["Perception", "Stealth"])
-    tool_profs.extend(["Forgery Kit"])
-    equipment.extend(["Forgery Kit", "Set of Common Clothes", "5 gp"])
-    
-if background == "House Agent":
-    house = random.choice(["Cannith", "Deneith", "Ghallanda", "Jorasco", "Kundarak", "Lyrandar", "Medani", "Orien", "Phiarlan", "Sivis", "Tharashk", "Thuranni", "Vadalis"])
-    background = "House Agent of the " + house + " House"
-    skill_profs.extend(["Investigation", "Persuasion"])
-    if house == "Cannith":
-        tool_profs.extend(["Alchemist's Supplies", "Tinker's Tools"])
-    if house == "Deneith":
-        tool_profs.extend([random.choice(gaming_sets), "Land Vehicles"])
-    if house == "Ghallanda":
-        tool_profs.extend(["Brewer's Supplies", "Cook's Utensils"])
-    if house == "Jorasco":
-        tool_profs.extend(["Alchemist's Supplies", "Herbalism Kit"])
-    if house == "Kundarak":
-        tool_profs.extend(["Tinker's Tools", "Thieves' Tools"])
-    if house == "Lyrandar":
-        tool_profs.extend(["Sea Vehicles", "Air Vehicles", "Navigator's Tools"])
-    if house == "Medani":
-        tool_profs.extend(["Thieves' Tools", "Disguise Kit"])
-    if house == "Orien":
-        tool_profs.extend(["Land Vehicles", random.choice(gaming_sets)])
-    if house == "Phiarlan":
-        tool_profs.extend(["Disguise Kit", random.choice(musical_instruments)])
-    if house == "Sivis":
-        tool_profs.extend(["Calligrapher's Tools", "Forgery Kit"])
-    if house == "Tharashk":
-        tool_profs.extend(["Thieve's Tools", random.choice(gaming_sets)])
-    if house == "Thuranni":
-        tool_profs.extend(["Poisoner's Kit", random.choice(gaming_sets)])
-    if house == "Vadalis":
-        tool_profs.extend(["Land Vehicles", "Herbalism Kit"])
-    equipment.extend(["Set of Fine Clothes", house + " Signet Ring", "ID Papers", "20 gp"])
-    
-if background == "Inheritor":
-    skill_profs.extend(["Survival", random.choice(["Arcana", "History", "Religion"])])
-    inheritor_tool = random.choice([random.choice(gaming_sets), random.choice(musical_instruments)])
-    tool_profs.extend([inheritor_tool])
-    equipment.extend(["Your Inheritance: " + random.choice([random.choice(["A Map", "A Letter", "A Journal"]), "A Trinket", "An Article of Clothing", "A Piece of Jewelry", "An Arcane " + random.choice(["Book", "Formulary"]), "A Written " + random.choice(["Story", "Song", "Poem", "Secret"]), "A Tattoo"]), "Set of Traveler's Clothes", inheritor_tool, "15 gp"])
-    
-if background == "Initiate":
-    skill_profs.extend(["Athletics", "Intimidation"])
-    initiate_gaming_set = random.choice(gaming_sets)
-    tool_profs.extend([initiate_gaming_set, "Land Vehicles"])
-    equipment.extend(["Simple Puzzle Box", "Scroll Containing the Teachings of the Gods", initiate_gaming_set, "Set of Common Clothes", "15 gp"])
-    
-if background == "Inquisitor":
-    skill_profs.extend(["Investigation", "Religion"])
-    tool_profs.extend([random.choice(artisan_tools), "Thieves' Tools"])
-    equipment.extend(["Holy Symbol", "Set of Traveler's Clothes", "15 gp"])
-    
-if background == "Iron Route Bandit":
-    skill_profs.extend(["Animal Handling", "Stealth"])
-    tool_profs.extend([random.choice(gaming_sets), "Land Vehicles"])
-    equipment.extend(["Set of Dark Common Clothes", "Pack Saddle", "Burglar's Pack", "5 gp"])
-    
-if background == "Knight of the Order":
-    order = random.choice(["the Unicorn", "Myth Drannor", "the Silver Chalice"])
-    background = "Knight of the Order of " + order
-    skill_profs.extend(["Persuasion"])
-    if order == "the Unicorn":
-        skill_profs.extend([random.choice(["Arcana", "Religion"])])
-    if order == "Myth Drannor":
-        skill_profs.extend([random.choice(["Nature", "History"])])
-    if order == "the Silver Chalice":
-        skill_profs.extend([random.choice(["History", "Religion"])])
-    tool_profs.extend([random.choice([random.choice(gaming_sets), random.choice(musical_instruments)])])
-    equipment.extend(["Set of Traveler's Clothes", random.choice(["Signet", "Banner", "Seal"]) + " Representing Your Rank in the Order of " + order, "10 gp"])
-    
-if background == "Mercenary Veteran":
-    company = random.choice(["The Chill", "Silent Rain", "The Bloodaxes"])
-    background = "Mercenary Veteran from " + company
-    skill_profs.extend(["Athletics", "Persuasion"])
-    mercenary_veteran_gaming_set = random.choice(gaming_sets)
-    tool_profs.extend([mercenary_veteran_gaming_set, "Land Vehicles"])
-    equipment.extend(["Uniform from " + company, "Insignia of Your Rank from " + company, mercenary_veteran_gaming_set, "10 gp"])
-    
-if background == "Mulmaster Aristocrat":
-    skill_profs.extend(["Deception", "Performance"])
-    mulmaster_aristocrat_artisan_tool = random.choice(artisan_tools)
-    mulmaster_aristocrat_musical_instrument = random.choice(musical_instruments)
-    tool_profs.extend([mulmaster_aristocrat_artisan_tool, mulmaster_aristocrat_musical_instrument])
-    equipment.extend([random.choice([mulmaster_aristocrat_artisan_tool, mulmaster_aristocrat_musical_instrument]), "Set of Fine Clothes", "10 gp"])
-    
-if background == "Noble":
-    skill_profs.extend(["History", "Persuasion"])
-    tool_profs.extend([random.choice(gaming_sets)])
-    equipment.extend(["Set of Fine Clothes", "Signet Ring", "Scroll of Pedigree", "25 gp"])
-    
-if background == "Outlander":
-    origin = random.choice(["Forester", "Trapper", "Homesteader", "Guide", "Exile", "Outcast", "Bounty Hunter", "Pilgrim", "Tribal Nomad", "Hunter-Gatherer", "Tribal Marauder"])
-    background = "Outlander " + origin
-    skill_profs.extend(["Athletics", "Survival"])
-    tool_profs.extend([random.choice(musical_instruments)])
-    equipment.extend(["Staff", "Hunting Trap", "Trophy from an Animal You Killed", "Set of Traveler's Clothes", "10 gp"])
-    
-if background == "Phlan Insurgent":
-    skill_profs.extend(["Stealth", "Survival"])
-    tool_profs.extend([random.choice(artisan_tools), "Land Vehicles"])
-    equipment.extend(["Bag of 20 Caltrops", "Small Trinket from Your Home", "Healer's Kit", "Set of Dark Common Clothes", "5 gp"])
 
-if background == "Phlan Refugee":
-    skill_profs.extend(["Athletics", "Insight"])
-    phlan_refugee_tool = random.choice(artisan_tools)
-    tool_profs.extend([phlan_refugee_tool])
-    equipment.extend([phlan_refugee_tool, "Token from Home", "Set of Traveler's Clothes", "15 gp"])
-    
-if background == "Sage":
-    specialty = random.choice(["Alchemist", "Astronomer", "Discredited Academic", "Librarian", "Professor", "Researcher", "Wizard's Apprentice", "Scribe"])
-    background = "Sage " + specialty
-    skill_profs.extend(["Arcana", "History"])
-    equipment.extend(["Bottle of Black Ink", "Quill", "Small Knife", "Letter from a Dead Colleague Posing a Question You Cannot yet Answer", "Set of Common Clothes", "10 gp"])
-    
-if background == "Sailor":
-    skill_profs.extend(["Athletics", "Perception"])
-    tool_profs.extend(["Navigator's Tools", "Water Vehicles"])
-    equipment.extend(["Belaying Pin (Club)", "50 ft of Silk Rope", "Lucky Charm (Trinket)", "Set of Common Clothes", "10 gp"])
-    
-if background == "Secret Identity": # Has to be non human
-    skill_profs.extend(["Deception", "Stealth"])
-    tool_profs.extend(["Disguise Kit", "Forgery Kit"])
-    equipment.extend(["Disguise Kit", "Forgery Kit", "Set of Common Clothes", "5 gp"])
-    
-if background == "Shade Fanatic":
-    skill_profs.extend(["Deception", "Intimidation"])
-    tool_profs.extend(["Forgery Kit"])
-    equipment.extend(["Forgery Kit", "Transparent Cylinder of Shadow that has no Opening", "Signet Ring", "Set of Fine Clothes", "15 gp"])
-    
-if background == "Soldier":
-    specialty = random.choice(["Officer", "Scout", "Infantry", "Cavalry", "Healer", "Quartermaster", "Standard Bearer", "Support Staff"])
-    background = "Soldier " + specialty
-    skill_profs.extend(["Athletics", "Intimidation"])
-    tool_profs.extend([random.choice(gaming_sets), "Land Vehicles"])
-    equipment.extend(["Insignia of Rank", "Trophy Taken from a Fallen Enemy", random.choice(["Bond Dice Set", "Playing Card Set"]), "Set of Common Clothes", "10 gp"])
-    
-if background == "Stojanow Prisoner":
-    skill_profs.extend(["Deception", "Perception"])
-    tool_profs.extend([random.choice(gaming_sets), "Thieves' Tools"])
-    equipment.extend(["Small Knife", "Set of Common Clothes", "Trinket from Home", "10 gp"])
-    
-if background == "Ticklebelly Nomad":
-    skill_profs.extend(["Animal Handling", "Nature"])
-    tool_profs.extend(["Herbalism Kit"])
-    equipment.extend(["Herbalism Kit", "Small Article of Jewelry Distinct to Your Tribe", "Hunting Trap", "Set of Common Clothes", "5 gp"])
-    
-if background == "Trade Sheriff":
-    skill_profs.extend(["Investigation", "Persuasion"])
-    tool_profs.extend(["Thieves' Tools"])
-    equipment.extend(["Thieves' Kit", "Gray Cloak", "Sherrif's Insignia", "Set of Fine Clothes", "17 gp"])
-    
-if background == "Urban Bounty Hunter":
-    skill_profs.extend(random.sample(["Deception", "Insight", "Persuasion", "Stealth"], 2))
-    tool_profs.extend(random.sample([random.choice(gaming_sets), random.choice(musical_instruments), "Theives' Tools"],2))
-    equipment.extend([random.choice(["Set of Common Clothes", "Set of Traveler's Clothes", "Set of Fine Clothes"]), "20 gp"])
-    
-if background == "Urchin":
-    skill_profs.extend(["Sleight of Hand", "Stealth"])
-    tool_profs.extend(["Disguise Kit", "Thieve's Tools"])
-    equipment.extend(["Small Knife", "Map of Your Home City", "Pet Mouse", "Token to Remember Your Parents", "Set of Common Clothes", "10 gp"])
-    
-if background == "Uthgardt Tribe Member":
-    skill_profs.extend(["Athletics", "Survival"])
-    tool_profs.extend([random.choice([random.choice(artisan_tools), random.choice(musical_instruments)])])
-    equipment.extend(["Hunting Trap", random.choice(["Totemic Token", "Set of Tattoos"]) + " Marking Your Loyalty to Uthgar", "Set of Traveler's Clothes", "10 gp"])
-    
-if background == "Vizier":
-    skill_profs.extend(["History", "Religion"])
-    vizier_artisan_tool = random.choice(artisan_tools)
-    vizier_musical_instrument = random.choice(musical_instruments)
-    tool_profs.extend([vizier_artisan_tool, vizier_musical_instrument])
-    equipment.extend([random.choice([vizier_artisan_tool, vizier_musical_instrument]), "Scroll of Your God's Teachings", "Vizier's Cartouche", "Set of Fine Clothes", "25 gp"])
-    
-if background == "Waterdhavian Noble":
-    skill_profs.extend(["History", "Persuasion"])
-    tool_profs.extend([random.choice([random.choice(gaming_sets), random.choice(musical_instruments)])])
-    equipment.extend(["Set of Fine Clothes", random.choice(["Signet Ring", "Brooch"]), "Scroll of Pedigree", "Skin of Fine " + random.choice(["Zzar", "Wine"]), "25 gp"])
+### BACKGROUND DEFINITIONS ###
 
-alignment = ["Lawful Good", "Neutral Good", "Chaotic Good", "Lawful Neutral", "True Neutral", "Chaotic Neutral", "Lawful Evil", "Neutral Evil", "Chaotic Evil"]
-alignment = random.choice(alignment)
+class BackgroundName(enum.StrEnum):
+    ACOLYTE = "Acolyte"
+    CHARLATAN = "Charlatan"
+    CRIMINAL = "Criminal"
+    ENTERTAINER = "Entertainer"
+    FOLK_HERO = "Folk Hero"
+    GUILD_ARTISAN = "Guild Artisan"
+    HERMIT = "Hermit"
+    KNIGHT = "Knight"
+    NOBLE = "Noble"
+    OUTLANDER = "Outlander"
+    PIRATE = "Pirate"
+    SAGE = "Sage"
+    SAILOR = "Sailor"
+    SCRIBE = "Scribe"
+    SOLDIER = "Soldier"
+    URCHIN = "Urchin"
+
+class Background:
+    name: BackgroundName
+    sub_backrounds: list[str]
+    skill_profs: list[Skills]
+    tool_profs: list[AllTools]
+    possible_tool_profs: list[AllTools]
+    tool_prof_count: int
+    possible_languages: list[Languages]
+    language_count: int
+    traits: list[AllTraits]
+    gp: int
+    equipment: list[str]
+
+    def apply_subbackground(self, subbackground: Any):
+        pass
+    
+'''
+class (Background):
+    name = BackgroundName.
+    class SubBackground(enum.StrEnum):
+        a
+    sub_backgrounds = []
+    skill_profs = []
+    tool_profs = []
+    possible_tool_profs = []
+    tool_prof_count = 0
+    possible_languages = []
+    language_count = 0
+    traits = []
+    gp = 0
+    equipment = []
+
+    def apply_subbackground(self, subbackground):
+        if subbackground == 
+'''
+
+class Acolyte(Background):
+    name = BackgroundName.ACOLYTE
+    sub_backrounds = []
+    skill_profs = [Skills.INSIGHT, Skills.RELIGION]
+    tool_profs = []
+    possible_tool_profs = []
+    tool_prof_count = 0
+    possible_languages = list(Languages)
+    language_count = 2
+    traits = [BackgroundTrait.SHELTER_OF_THE_FAITHFUL]
+    gp = 15
+    equipment = [] # mega TODO ["Holy Symbol", random.choice(["Prayer Book", "Prayer Wheel"]), "5 Sticks of Incense", "Vestments", "Common Clothes"]
+
+class Charlatan(Background):
+    name = BackgroundName.CHARLATAN
+    sub_backrounds = []
+    skill_profs = [Skills.DECEPTION, Skills.SLEIGHT_OF_HAND]
+    tool_profs = [Tools.DISGUISE, Tools.FORGERY]
+    possible_tool_profs = []
+    tool_prof_count = 0
+    possible_languages = []
+    language_count = 0
+    traits = [BackgroundTrait.FALSE_IDENTITY]
+    gp = 15
+    equipment = [] # mega TODO ["Fine Clothes", "Disguise Kit", random.choice(["Ten Stoppered Bottles Filled with Coloured Liquid", "Set of Weighted Dice", "Deck of Marked Cards", "Signet Ring of an Imaginary Duke"])
+
+class Criminal(Background):
+    name = BackgroundName.CRIMINAL
+    sub_backrounds = ["Blackmailer", "Burglar", "Enforcer", "Fence", "Highway Robber", "Hired Killer", "Pickpocket",
+                       "Smuggler", "Spy"] # TODO make it so subbackground gets added to display name for Background
+    skill_profs = [Skills.DECEPTION, Skills.STEALTH]
+    tool_profs = [Tools.THIEF]
+    possible_tool_profs = list(GamingSets)
+    tool_prof_count = 1
+    possible_languages = []
+    language_count = 0
+    traits = [BackgroundTrait.CRIMINAL_CONTACT]
+    gp = 15
+    equipment = [] # Crowbar, dark clothes including hood
+       
+class Entertainer(Background):
+    name = BackgroundName.ENTERTAINER
+    sub_backrounds = ["Actor", "Dancer", "Fire-Eater", "Gladiator", "Jester", "Juggler", "Instrumentalist",
+                      "Poet", "Singer", "Storyteller", "Tumbler"] # TODO every entertainer gets 1-3 routines they're good at
+    skill_profs = [Skills.ACROBATICS, Skills.PERFORMANCE]
+    tool_profs = [Tools.DISGUISE]
+    possible_tool_profs = list(MusicalInstruments)
+    tool_prof_count = 1
+    possible_languages = []
+    language_count = 0
+    traits = [BackgroundTrait.BY_POPULAR_DEMAND]
+    gp = 15
+    equipment = [] # Whichver musical instrument proficiency picks, "Costume", random.choice(["Love Letter from an Admirer", "Lock of Hair from an Admirer", "Trinket from an Admirer"])
+  
+class FolkHero(Background):
+    name = BackgroundName.FOLK_HERO
+    sub_backrounds = []
+    skill_profs = [Skills.ANIMAL_HANDLING, Skills.SURVIVAL]
+    tool_profs = [Tools.LAND_VEHICLES]
+    possible_tool_profs = list(ArtisanTools)
+    tool_prof_count = 1
+    possible_languages = []
+    language_count = 0
+    traits = [BackgroundTrait.RUSTIC_HOSPITALITY]
+    gp = 10
+    equipment = [] # proficient artisan tool, Shovel, Iron Pot, Set of Common Clothes
+
+class GuildArtisan(Background):
+    name = BackgroundName.GUILD_ARTISAN
+    sub_backrounds = ["Alchemists, Apothecaries", "Armorours, Locksmiths, Finesmiths", "Brewers, Distillers, Vintners", "Calligraphers, Scribes, Scriveners",
+                      "Carpenters, Roofers, Pasterers", "Cobblers, Shoemakers", "Cooks, Bakers", "Glassblowers, Glaziers", "Jewelers, Gemcutters",
+                      "Leatherworkers, Skinners, Tanners", "Masons, Stonecutters", "Painters, Limners, Sign-Makers", "Potters, Tile-Makers", "Merchants",
+                      "Shipwrights, Sailmakers", "Smiths, Metal-Forgers", "Tinkers, Pewterers, Casters", "Weavers, Dryers", "Woodcarvers, Coopers, Bowyers"]
+    skill_profs = [Skills.INSIGHT, Skills.PERSUASION]
+    tool_profs = []
+    possible_tool_profs = list(ArtisanTools)
+    tool_prof_count = 1
+    possible_languages = []
+    language_count = 0
+    traits = [BackgroundTrait.GUILD_MEMBERSHIP]
+    gp = 15
+    equipment = [] # proficient artisan tool, Letter of Introduction from your guild
+
+class Hermit(Background):
+    name = BackgroundName.HERMIT
+    sub_backrounds = []
+    skill_profs = [Skills.MEDICINE, Skills.RELIGION]
+    tool_profs = [Tools.HERBALIST]
+    possible_tool_profs = []
+    tool_prof_count = 0
+    possible_languages = list(Languages)
+    language_count = 1
+    gp = 5
+    equipment = [] # "Scroll Case Stuffed Full of Notes from Your " + random.choice(["Prayers", "Studies"]), "Winter Blanket", "Set of Common Clothes", "Herbalism Kit"]
+
+class Noble(Background):
+    name = BackgroundName.NOBLE
+    class SubBackground(enum.StrEnum):
+        ARISTOCRAT = "Aristocrat"
+        KNIGHT = "Knight"
+    sub_backrounds = ["Aristocrat", "Knight"]
+    skill_profs = [Skills.HISTORY, Skills.PERSUASION]
+    tool_profs = []
+    possible_tool_profs = list(GamingSets)
+    tool_prof_count = 1
+    possible_languages = list(Languages)
+    language_count = 1
+    gp = 25
+    equipment = [] # ["Set of Fine Clothes", "Signet Ring", "Scroll of Pedigree"]
+
+    def apply_subbackground(self, subbackground):
+        if subbackground == Noble.SubBackground.ARISTOCRAT:
+            self.traits.append(BackgroundTrait.POSITION_OF_PRIVILEGE)
+        elif subbackground == Noble.SubBackground.KNIGHT:
+            self.traits.append(BackgroundTrait.RETAINERS)
+
+class Outlander(Background):
+    name = BackgroundName.OUTLANDER
+    sub_backgrounds = ["Forester", "Trapper", "Homesteader", "Guide", "Exile/Outcast", "Bounty Hunter",
+                       "Pilgrim", "Tribal Nomad", "Hunter-Gatherer", "Tribal Marauder"]
+    skill_profs = [Skills.ATHLETICS, Skills.SURVIVAL]
+    tool_profs = []
+    possible_tool_profs = list(MusicalInstruments)
+    tool_prof_count = 1
+    possible_languages = list(Languages)
+    language_count = 1
+    traits = [BackgroundTrait.WANDERER]
+    gp = 10
+    equipment = [] #["Staff", "Hunting Trap", "Trophy from an Animal You Killed", "Set of Traveler's Clothes"]
+
+class Sage(Background):
+    name = BackgroundName.SAGE
+    sub_backgrounds = ["Alchemist", "Astronomer", "Discredited Academic", "Librarian", "Professor",
+                       "Researcher", "Wizard's Apprentice", "Scribe"]
+    skill_profs = [Skills.ARCANA, Skills.HISTORY]
+    tool_profs = []
+    possible_tool_profs = []
+    tool_prof_count = 0
+    possible_languages = list(Languages)
+    language_count = 2
+    traits = [BackgroundTrait.RESEARCHER]
+    gp = 10
+    equipment = [] #["Bottle of Black Ink", "Quill", "Small Knife", "Letter from a Dead Colleague Posing a Question You Cannot yet Answer", "Set of Common Clothes"]
+
+class Sailor(Background):
+    name = BackgroundName.SAILOR
+    class SubBackground(enum.StrEnum):
+        SAILOR = "Sailor"
+        PIRATE = "Pirate"
+    sub_backgrounds = ["Sailor", "Pirate"]
+    skill_profs = [Skills.ATHLETICS, Skills.PERCEPTION]
+    tool_profs = [Tools.NAVIGATOR, Tools.WATER_VEHICLES]
+    possible_tool_profs = []
+    tool_prof_count = 0
+    possible_languages = []
+    language_count = 0
+    traits = []
+    gp = 10
+    equipment = [] #["Belaying Pin (Club)", "50 ft of Silk Rope", "Lucky Charm (Trinket)", "Set of Common Clothes"]
+
+    def apply_subbackground(self, subbackground):
+        if subbackground == Sailor.SubBackground.SAILOR:
+            self.traits.append(BackgroundTrait.SHIPS_PASSAGE)
+        elif subbackground == Sailor.SubBackground.PIRATE:
+            self.traits.append(BackgroundTrait.BAD_REPUTATION)
+
+class Soldier(Background):
+    name = BackgroundName.SOLDIER
+    sub_backgrounds = ["Officer", "Scout", "Infantry", "Cavalry", "Healer",
+                       "Quartermaster", "Standard Bearer", "Support Staff"]
+    skill_profs = [Skills.ATHLETICS, Skills.INTIMIDATION]
+    tool_profs = [Tools.LAND_VEHICLES]
+    possible_tool_profs = list(GamingSets)
+    tool_prof_count = 1
+    possible_languages = []
+    language_count = 0
+    traits = [BackgroundTrait.MILITARY_RANK]
+    gp = 10
+    equipment = [] # ["Insignia of Rank", "Trophy Taken from a Fallen Enemy", random.choice(["Bond Dice Set", "Playing Card Set"]), "Set of Common Clothes"]
+
+class Urchin(Background):
+    name = BackgroundName.URCHIN
+    sub_backgrounds = []
+    skill_profs = [Skills.SLEIGHT_OF_HAND, Skills.STEALTH]
+    tool_profs = [Tools.DISGUISE, Tools.THIEF]
+    possible_tool_profs = []
+    tool_prof_count = 0
+    possible_languages = []
+    language_count = 0
+    traits = [BackgroundTrait.CITY_SECRETS]
+    gp = 10
+    equipment = [] # ["Small Knife", "Map of Your Home City", "Pet Mouse", "Token to Remember Your Parents", "Set of Common Clothes"]
 
 skill_expertises = [item for item, count in collections.Counter(skill_profs).items() if count > 1] # I included this so if you get the same skill proficiency from two different sources, it becomes an expertise (it's pretty darn rare)
 tool_expertises = [item for item, count in collections.Counter(tool_profs).items() if count > 1] # You can delete these two rows if you don't want innate expertises
+
+class Character:
+    character_class: CharacterClass | None = None
+    skill_profs: list[Skills] = []
+    hp: int = 0
+    gp: int = 0
+    subclass: str = ""
+    
+    def create(self):
+        pass
+
+    def display_character(self):
+        # print everything
+        # self.character_class.print_extra_attributes()
+        pass
 
 print("Race:", race)
 if subrace != "N/A":
