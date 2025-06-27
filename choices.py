@@ -1,18 +1,24 @@
+from dataclasses import dataclass
+from itertools import chain
 from random import sample
-from typing import Generic, TypeVar
+from typing import Generic, Iterable, List, TypeVar, Union
 
 T = TypeVar('T')
 
+
 class Options(Generic[T]):
-    def __init__(self, choices: list[T], num_choices: int, priors: list[T] = []):
+    """Representation of a number of choices, and a list of given guarantees
+    
+    Attributes:
+        choices     list of items to pick from
+        priors      list of guaranteed items, default nothing
+        num_choices number of choices from the choices list, default 1
+    """
+    def __init__(self, choices: list[T], priors: list[T] = [], num_choices: int = 1):
         self.priors = priors
         self.choices = [choice for choice in choices if choice not in priors]
         self.num_choices = num_choices
-    
-    """Helper to create a choice for one item"""
-    @classmethod
-    def one_of(cls, items: list[T], priors: list[T] = []):
-        return cls(items, 1, priors)
+
     
 def _interactive_resolve(options: Options) -> list[T]:
     def validate_input(input: str, max_val: int) -> list | None:
@@ -31,6 +37,9 @@ def _interactive_resolve(options: Options) -> list[T]:
     picks: list[T] = []
     remaining_num_choices = options.num_choices
     choices = options.choices
+    if remaining_num_choices == len(choices):
+        picks.extend(options.choices)
+        return picks
     while remaining_num_choices > 0:
         print(f"Choose {remaining_num_choices} from:")
         for i, choice in enumerate(choices):
@@ -50,28 +59,98 @@ def _interactive_resolve(options: Options) -> list[T]:
         remaining_num_choices -= len(user_input)
     return picks
 
-def resolve(options: Options | list[Options], interactive = False) -> list[T]:
-    if isinstance(options, list):
-        picks: list[T] = []
-        for option in options:
-            if interactive:
-                picks.extend(_interactive_resolve(option))
+def resolve_old(options: Options | list[Options], interactive = False) -> list[T]:
+    def flatten(to_flatten: list) -> list:
+        res = []
+        for item in to_flatten:
+            if isinstance(item, list):
+                res.extend(flatten(item))
             else:
-                picks.extend(resolve(option))
+                res.append(item)
+        return res
+    picks: list[T] = []
+
+    if isinstance(options, list):
+        for option in options:
+            picks.extend(resolve_old(option, interactive=interactive))
     else:
+        for i, choice in enumerate(options.choices):
+            if isinstance(choice, Options):
+                options.choices[i] = resolve_old(choice, interactive=interactive)
+        options.choices = flatten(options.choices)
         if interactive:
             return _interactive_resolve(options)
-        picks = sample(options.choices, options.num_choices)
+        picks.extend(sample(options.choices, options.num_choices))
         picks.extend(options.priors)
     return picks
 
+ChoiceUnit = Union[T,  tuple[T], 'Choice[T]']
+
+@dataclass
+class Choice(Generic[T]):
+    options: List[ChoiceUnit]
+    count: int = 1
+
+def resolve(items: List[ChoiceUnit]) -> List[T]:
+    result: List[T] = []
+
+    for item in items:
+        if isinstance(item, Choice):
+            if item.count >= len(item.options):
+                chosen = item.options
+            else:
+                chosen = sample(item.options, item.count)
+            result.extend(resolve(chosen))
+        elif isinstance(item, tuple):
+            result.extend(resolve(list(item)))
+        else:
+            result.append(item)
+
+    return result
+
+def resolve_no_duplicates(items: List[ChoiceUnit]) -> List[T]: # CANNOT HANDLE CHOICE OF CHOICES
+    result: List[T] = []
+    all_options: List = []
+    picks: int = 0
+    for item in items:
+        if not isinstance(item, Choice):
+            if item not in result:
+                result.extend(item)
+        else:
+            all_options.extend(item.options)
+            picks += item.count
+    all_options = list(set(all_options))
+    for thing in result:
+        if thing in all_options:
+            all_options.remove(thing)
+    result.extend(sample(all_options, picks))
+    
+    return result
+
 if __name__ == "__main__":
-    all_langs = ["Common", "Elvish", "Orc", "Goblin", "Abyssal", "Celestial"]
-    basic_weapons = ["Sword", "Bow", "Mace", "Dagger"]
-    adv_weapons = ["Twohander", "Morningstar", "Crossbow", "Rapier"]
-    stats = Options(["STR", "DEX", "CON", "INT", "WIS"], 2, ["CHA"])
-    languages = Options(["Common", "Elvish", "Orc", "Goblin", "Abyssal"], 2, ["Common", "Elvish"])
-    complex_options = [Options(basic_weapons, 2, ["Sword"]), Options.one_of(adv_weapons, ["Twohander", "Crossbow"])]
-    print(resolve(stats))
-    print(resolve(languages, interactive=True))
-    print(resolve(complex_options))
+    a = "a"
+    b = "b"
+    c = "c"
+    d = "d"
+    e = "e"
+    f = "f"
+    
+    tests: dict[str, list[ChoiceUnit]] = {
+        "test_simple": [a], # pass [a]
+        "test_easy": [a, b, a], # pass [a, b]
+        "test_regular": [a, Choice([a, b, c, d, e, f], 3)], # pass [a, 3of(b,c,d,e,f)]
+        "test_complex": [a, Choice([(b, c), d])], # pass [a, 1of[(b,c), d]]
+        "test_googleplex": [a, Choice([b, Choice([c, d, e], 2)])], # pass [a, either{b, 2of(c,d,e)}]
+        "test_mutually_exclusive": [a, Choice([b, c]), Choice([a, b]), Choice([f])] # pass [a, b, c, f]
+    }
+    funcs = [resolve, resolve_no_duplicates]
+
+    for name, test in tests.items():
+        print(f"Test: {name}")
+        for func in funcs:
+            if name == "test_googleplex" and func.__name__ == "resolve_no_duplicates": continue
+            try:
+                print(f"{func.__name__}: ", func(test))
+            except:
+                print(f"{func.__name__} failed on {name}!")
+        print("====================================")
