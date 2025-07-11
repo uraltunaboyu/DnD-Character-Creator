@@ -1,5 +1,6 @@
 import enum
 from typing import Any
+import sys
 
 from common import *
 from choices import Choice, ChoiceUnit
@@ -39,42 +40,11 @@ class Race:
     traits: list[AllTraits | str | tuple[str, int]]
     languages: list[ChoiceUnit[AllLanguages]] = []
 
+    def __init__(self, level: int, interactive: bool):
+        pass
+
     def apply_subrace(self, subrace: Any):
         pass
-'''
-class (Race):
-    name = RaceName.
-    class Subrace(enum.StrEnum):
-        
-    subraces = list(Subrace)
-    stat_increases = [
-        (Attributes., 2),
-        (Attributes., 1)
-    ]
-    age_range = ()
-    base_height = 
-    base_weight = 
-    height_mod_range = ()
-    weight_range = ()
-    speed = 30
-    size = Sizes.
-    eyes = []
-    skin = []
-    hair = []
-    resistances = []
-    immunities = []
-    vulnerabilities = []
-    skill_profs = []
-    tool_profs = []
-    armour_profs = []
-    weapon_profs = []
-    traits = []
-    languages = []
-    
-    def apply_subrace(self, subrace: Any):
-        if subrace == :
-            self.
-'''
 
 class Dwarf(Race):
     name = RaceName.DWARF
@@ -337,7 +307,7 @@ class HalfElf(Race):
                 (Attributes.INT, 1),
                 (Attributes.WIS, 1)
             ], 2)
-    ] # TODO Double check that this is cool & good
+    ]
     age_range = (20, 160)
     base_height = 4*12 + 9
     base_weight = 110
@@ -391,3 +361,19 @@ class Tiefling(Race):
     resistances = [DamageType.FIRE]
     traits = [Traits.DARKVISION60, Traits.INFERNAL_LEGACY]
     languages = [Languages.COMMON, ExoticLanguages.INFERNAL]
+
+all_races: dict[RaceName,  type[Race]] = {
+    RaceName.DRAGONBORN: Dragonborn,
+    RaceName.DWARF: Dwarf,
+    RaceName.ELF: Elf,
+    RaceName.GNOME: Gnome,
+    RaceName.HALFLING: Halfling,
+    RaceName.HALF_ELF: HalfElf,
+    RaceName.HALF_ORC: HalfOrc,
+    RaceName.HUMAN: Human,
+    RaceName.TIEFLING: Tiefling
+    }
+
+if __name__ == "__main__":
+    print(list(RaceName))
+

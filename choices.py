@@ -91,7 +91,7 @@ class Choice(Generic[T]):
     options: List[ChoiceUnit]
     count: int = 1
 
-def resolve(items: List[ChoiceUnit]) -> List[T]:
+def resolve(items: List[ChoiceUnit], interactive: bool) -> List[T] | T:
     result: List[T] = []
 
     for item in items:
@@ -100,12 +100,13 @@ def resolve(items: List[ChoiceUnit]) -> List[T]:
                 chosen = item.options
             else:
                 chosen = sample(item.options, item.count)
-            result.extend(resolve(chosen))
+            result.extend(resolve(chosen, interactive))
         elif isinstance(item, tuple):
-            result.extend(resolve(list(item)))
+            result.extend(resolve(list(item), interactive))
         else:
             result.append(item)
-
+    if len(result) == 1:
+        return result[0]
     return result
 
 def resolve_no_duplicates(items: List[ChoiceUnit]) -> List[T]: # CANNOT HANDLE CHOICE OF CHOICES

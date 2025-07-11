@@ -32,9 +32,37 @@ from typing import Any # May not be needed here
 from choices import resolve, Choice, ChoiceUnit
 from common import *
 
-from PHB.backgrounds import *
-from PHB.classes import *
-from PHB.races import *
+from backgrounds import *
+from classes import *
+from races import *
+ 
+class Character:
+    character_class: CharacterClass
+    character_race: Race
+    character_background: Background
+    traits: list[AllTraits | str | tuple[str, int]] = []
+    skill_profs: list[ChoiceUnit[Skills]] = []
+    tool_profs: list[ChoiceUnit[AllTools]] = []
+    armour_profs: list[ChoiceUnit[ArmourTypes]] = []
+    weapon_profs: list[ChoiceUnit[WeaponTypes | Weapons]] = []
+    gear: list[ChoiceUnit[AllGear] | str] = []
+    combat_gear: list[ChoiceUnit[CombatGear]] = []
+    
+    def __init__(self, level: int, interactive: bool):
+        class_choice: ClassName = resolve([Choice(list(all_classes.keys()))], interactive) # type: ignore
+        self.character_class = all_classes[class_choice](level, interactive)
+        
+        race_choice: RaceName = resolve([Choice(list(all_races.keys()))], interactive) # type: ignore
+        self.character_race = all_races[race_choice](level, interactive)
+        
+        background_choice: BackgroundName = resolve([Choice(list(all_backgrounds.keys()))], interactive) # type: ignore
+        self.character_background = all_backgrounds[background_choice](level, interactive)
+        pass
+
+    def display_character(self):
+        # print everything
+        # self.character_class.print_extra_attributes()
+        pass
 
 # def normal(min:int, max:int) -> int: # Not exactly sure how this one is working, but it gives a more realistic result for age, height and weight
 #     r: int = round(random.triangular(low = min, high = max))# Round gives us a whole number for a character's age
@@ -95,24 +123,6 @@ from PHB.races import *
 # 
 # STR = StatRoll()
 # =============================================================================
-  
-# skill_expertises = [item for item, count in collections.Counter(skill_profs).items() if count > 1] # I included this so if you get the same skill proficiency from two different sources, it becomes an expertise (it's pretty darn rare)
-# tool_expertises = [item for item, count in collections.Counter(tool_profs).items() if count > 1] # You can delete these two rows if you don't want innate expertises
-
-class Character:
-    character_class: CharacterClass | None = None
-    skill_profs: list[Skills] = []
-    hp: int = 0
-    gp: int = 0
-    subclass: str = ""
-    
-    def create(self):
-        pass
-
-    def display_character(self):
-        # print everything
-        # self.character_class.print_extra_attributes()
-        pass
 
 # print("Race:", race)
 # if subrace != "N/A":

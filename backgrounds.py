@@ -13,13 +13,10 @@ class BackgroundName(enum.StrEnum):
     FOLK_HERO = "Folk Hero"
     GUILD_ARTISAN = "Guild Artisan"
     HERMIT = "Hermit"
-    KNIGHT = "Knight"
     NOBLE = "Noble"
     OUTLANDER = "Outlander"
-    PIRATE = "Pirate"
     SAGE = "Sage"
     SAILOR = "Sailor"
-    SCRIBE = "Scribe"
     SOLDIER = "Soldier"
     URCHIN = "Urchin"
 
@@ -33,11 +30,14 @@ class Background:
     traits: list[AllTraits | str | tuple[str, int]] = []
     languages: list[ChoiceUnit[AllLanguages]] = []
     combat_gear: list[ChoiceUnit[CombatGear]] = []
-    gear: list[AllGear | Choice[ChoiceUnit[AllGear]]] = [] # TODO either write up more gear in the common_defs or allow strings
+    gear: list[ChoiceUnit[AllGear] | str] = [] # TODO either write up more gear in the common_defs or allow strings
     gp: int
 
 
     def apply_subbackground(self, subbackground: Any):
+        pass
+
+    def __init__(self, level: int, interactive: bool):
         pass
 
 class Acolyte(Background):
@@ -78,7 +78,6 @@ class Entertainer(Background):
   
 class FolkHero(Background):
     name = BackgroundName.FOLK_HERO
-    sub_backrounds = []
     skill_profs = [Skills.ANIMAL_HANDLING, Skills.SURVIVAL]
     tool_profs = [Choice(list(ArtisanTools)), Tools.LAND_VEHICLES]
     traits = [BackgroundTrait.RUSTIC_HOSPITALITY]
@@ -182,3 +181,19 @@ class Urchin(Background):
     gear = [Gear.CLOTHES_COMMON] 
     combat_gear = [Weapons.DAGGER]
     gp = 10 #["Map of Your Home City", "Pet Mouse", "Token to Remember Your Parents"]
+
+all_backgrounds: dict[BackgroundName, type[Background]] = {
+    BackgroundName.ACOLYTE: Acolyte,
+    BackgroundName.CHARLATAN: Charlatan,
+    BackgroundName.CRIMINAL: Criminal,
+    BackgroundName.ENTERTAINER: Entertainer,
+    BackgroundName.FOLK_HERO: FolkHero,
+    BackgroundName.GUILD_ARTISAN: GuildArtisan,
+    BackgroundName.HERMIT: Hermit,
+    BackgroundName.NOBLE: Noble,
+    BackgroundName.OUTLANDER: Outlander,
+    BackgroundName.SAGE: Sage,
+    BackgroundName.SAILOR: Sailor,
+    BackgroundName.SOLDIER: Soldier,
+    BackgroundName.URCHIN: Urchin
+}

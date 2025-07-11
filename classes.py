@@ -2,7 +2,7 @@ import enum
 import random
 
 from common import *
-from choices import Choice, ChoiceUnit
+from choices import Choice, ChoiceUnit, resolve
 
 class ClassName(enum.StrEnum):
     BARBARIAN = "Barbarian"
@@ -20,27 +20,23 @@ class ClassName(enum.StrEnum):
 
 class CharacterClass:
     name: ClassName
+    subclasses: list[enum.StrEnum] = []
+    subclass_threshold: int
     armour_profs: list[ChoiceUnit[ArmourTypes]] = []
-    saving_throw_profs: list[ChoiceUnit[Attributes]] = []
+    saving_throw_profs: list[Attributes] = []
     skill_profs: list[ChoiceUnit[Skills]] = []
     weapon_profs: list[ChoiceUnit[WeaponTypes | Weapons]] = []
-    traits: list[tuple[str, int] | tuple[str, int, enum.StrEnum]] #TODO Ability score improvement not included in traits since it feels redundant to put it 5 times in every class (lvl 4,8,12,16,19)
+    traits: list[AllTraits | str | tuple[str, int]] = [] #TODO Ability score improvement not included in traits since it feels redundant to put it 5 times in every class (lvl 4,8,12,16,19)
     combat_gear: list[ChoiceUnit[CombatGear]] = []
     gear: list[ChoiceUnit[AllGear]] = []
     tool_profs: list[ChoiceUnit[AllTools]] = []
 
     hit_die = 0
     
-    def __init__(self):
-        pass
-
-    def define_subclass(self):
-        pass
-
-    def resolve_traits(self):
-        pass
-
-    def resolve_proficiencies(self, proficiencies):
+    def __init__(self, level: int, interactive: bool):
+        if level >= self.subclass_threshold:
+            self.subclass: enum.StrEnum = resolve([Choice(self.subclasses)], interactive) # type: ignore
+            self.traits.extend(self.subclass.to_traits()) # type: ignore
         pass
 
 class FightingClass(CharacterClass):
@@ -55,8 +51,9 @@ class Barbarian(CharacterClass):
     name = ClassName.BARBARIAN
     hit_die = 12
     # Subclass at Level 3, officially called "Primal Path"
-    # Base Rules = Berserker, Totem Warior
-    class Subclasses(enum.StrEnum): # TODO level check for subclass
+    # Base Rules = Berserker, Totem Warrior
+    subclass_threshold = 3
+    class Subclasses(enum.StrEnum):
         BERSERKER = "Berserker"
         TOTEM_WARRIOR = "Totem Warrior"
         
@@ -69,6 +66,7 @@ class Barbarian(CharacterClass):
                 Barbarian.Subclasses.BERSERKER: [("Frenzy", 3), ("Mindless Rage", 6), ("Intimidating Presence", 10), ("Retaliation", 14)],
                 Barbarian.Subclasses.TOTEM_WARRIOR: [("Spirit Seeker", 3), ("Totem Spirit", 3), ("Aspect of the Beast", 6), ("Spirit Walker", 10), ("Totemic Attunement", 14)]
             }[self]
+    subclasses = list(Subclasses)
     armour_profs = [ArmourTypes.LIGHT, ArmourTypes.MEDIUM, ArmourTypes.SHIELD]
     weapon_profs = list(WeaponTypes)
     saving_throw_profs = [Attributes.STR, Attributes.CON]
@@ -84,6 +82,7 @@ class Bard(CharacterClass):
     hit_die = 8
     # Subclass at Level 3, officially called "Bard College"
     # Base Rules = Lore, Valor
+    subclass_threshold = 3
     class Subclasses(enum.StrEnum):
         LORE = "Lore"
         VALOR = "Valor"
@@ -97,6 +96,7 @@ class Bard(CharacterClass):
                 Bard.Subclasses.LORE: [("Bonus Proficiencies", 3), ("Cutting Words", 3), ("Additional Magical Secrets", 6), ("Peerless Skill", 14)],
                 Bard.Subclasses.VALOR: [("Bonus Proficiencies", 3), ("Combat Inspiration", 3), ("Extra Attack", 6), ("Battle Magic", 14)]
             }[self]
+    subclasses = list(Subclasses)
     armour_profs = [ArmourTypes.LIGHT]
     weapon_profs = [WeaponTypes.SIMPLE_WEAPONS, Weapons.HAND_CROSSBOW, Weapons.LONGSWORD, Weapons.RAPIER, Weapons.SHORTSWORD]
     saving_throw_profs = [Attributes.DEX, Attributes.CHA]
@@ -112,6 +112,7 @@ class Cleric(CharacterClass):
     hit_die = 8
     # Subclass at Level 1, officially called "Divine Domain"
     # Base Rules = Knowledge, Life, Light, Nature, Tempest, Trickery, War
+    subclass_threshold = 1
     class Subclasses(enum.StrEnum):
         KNOWLEDGE = "Knowledge Domain"
         LIFE = "Life Domain"
@@ -131,6 +132,7 @@ class Cleric(CharacterClass):
                 Cleric.Subclasses.TRICKERY: [("Blessing of the Trickster", 1), ("Channel Divinity: Invoke Duplicity", 2), ("Channel Divinity: Cloak of Shadows", 6), ("Divine Strike", 8), ("Improved Duplicity", 17)],
                 Cleric.Subclasses.WAR: [("Bonus Proficiencies", 1), ("War Priest", 1), ("Channel Divinity: Guided Strike", 2), ("Channel Divinity: War God's Blessing", 6), ("Divine Strike", 8), ("Avatar of Battle", 17)],
             }[self]
+    subclasses = list(Subclasses)
     armour_profs = [ArmourTypes.LIGHT, ArmourTypes.MEDIUM, ArmourTypes.SHIELD]
     weapon_profs = [WeaponTypes.SIMPLE_WEAPONS]
     saving_throw_profs = [Attributes.WIS, Attributes.CHA]
@@ -154,6 +156,7 @@ class Druid(CharacterClass):
     hit_die = 8
     # Subclass at Level 2, officially called "Druid Circle"
     # Base Rules = Land, Moon
+    subclass_threshold = 2
     class Subclasses(enum.StrEnum):
         LAND = "Land"
         MOON = "Moon"
@@ -167,6 +170,7 @@ class Druid(CharacterClass):
                 Druid.Subclasses.LAND: [("Bonus Cantrip", 2), ("Natural Recovery", 2), ("Circle Spells", 3), ("Land's Stride", 14), ("Nature's Ward", 10), ("Nature's Sanctuary", 14)],
                 Druid.Subclasses.MOON: [("Combat Wild Shape", 2), ("Circle Forms", 2), ("Primal Strike", 6), ("Elemental Wild Shape", 10), ("Thousand Forms", 14)]
             }[self]
+    subclasses = list(Subclasses)
     land_domains = ["Arctic", "Coast", "Desert", "Forest", "Grassland", "Mountain", "Swamp", "Underdark"]
     armour_profs = [ArmourTypes.LIGHT, ArmourTypes.MEDIUM, ArmourTypes.SHIELD]
     weapon_profs = [Weapons.CLUB, Weapons.DAGGER, Weapons.DART, Weapons.JAVELIN, Weapons.MACE, Weapons.QUARTERSTAFF, Weapons.SCIMITAR, Weapons.SICKLE, Weapons.SLING, Weapons.SPEAR]
@@ -176,13 +180,7 @@ class Druid(CharacterClass):
     combat_gear = [Choice([Weapons.SCIMITAR, Choice(list(SIMPLE_MELEE))]), Choice([Choice(list(WeaponTypes.SIMPLE_WEAPONS)), Armours.SHIELD]), Armours.LEATHER]
     gear = [Packs.EXPLORER, Choice(list(DruidicFocus))]
     traits = [("Druidic", 1), ("Spellcasting", 1), ("Wild Shape", 2), ("Timeless Body", 18), ("Beast Spells", 18), ("Archdruid", 20)]
-
-    def __init__(self): #TODO check if depreciated, if so, work it back into the thing somehow
-        super().__init__()
-
-    def define_subclass(self):
-        super().define_subclass() # TODO: druid subclasses are weird
-    
+   
 class Fighter(FightingClass):
     name = ClassName.FIGHTER
     hit_die = 10
@@ -191,6 +189,7 @@ class Fighter(FightingClass):
     fighting_styles = ["Archery", "Defense", "Dueling", "Great Weapon Fighting", "Protection", "Two-Weapon Fighting"]
     # Sublass at Level 3, officially called "Martial Archetype"
     # Base Rules = Battle Master, Champion, Eldritch Knight
+    subclass_threshold = 3
     class Subclasses(enum.StrEnum):
         BATTLE_MASTER = "Battle Master"
         CHAMPION = "Champion"
@@ -202,6 +201,7 @@ class Fighter(FightingClass):
                 Fighter.Subclasses.CHAMPION: [("Improved Critical", 3), ("Remarkable Athlete", 7), ("Additional Fighting Style", 10), ("Superior Critical", 15), ("Survivor", 18)],
                 Fighter.Subclasses.ELDRITCH: [("Spellcasting", 3), ("Weapon Bond", 3), ("War Magic", 7), ("Eldritch Strike", 10), ("Arcane Charge", 15), ("Improved War Magic", 18)]
             }[self]
+    subclasses = list(Subclasses)
     armour_profs = list(ArmourTypes)
     weapon_profs = list(WeaponTypes)
     saving_throw_profs = [Attributes.STR, Attributes.CON]
@@ -215,6 +215,7 @@ class Monk(CharacterClass):
     hit_die = 8
     # Subclass at Level 3, officially called "Monastic Tradition"
     # Base Rules = Four Elements, Open Hand, Shadow
+    subclass_threshold = 3
     class Subclasses(enum.StrEnum):
         FOUR_ELEMENTS = "Way of the Four Elements"
         OPEN_HAND = "Way of the Open Hand"
@@ -226,6 +227,7 @@ class Monk(CharacterClass):
                 Monk.Subclasses.OPEN_HAND: [("Open Hand Technique", 3), ("Wholeness of Body", 6), ("Tranquility", 11), ("Quivering Palm", 17)],
                 Monk.Subclasses.SHADOW: [("Shadow Arts", 3), ("Shadow Step", 6), ("Cloak of Shadows", 11), ("Opportunist", 17)]
             }[self]
+    subclasses = list(Subclasses)
     weapon_profs = [WeaponTypes.SIMPLE_WEAPONS, Weapons.SHORTSWORD]
     saving_throw_profs = [Attributes.STR, Attributes.DEX]
     skill_profs = [Choice([Skills.ACROBATICS, Skills.ATHLETICS, Skills.HISTORY, Skills.INSIGHT, Skills.RELIGION, Skills.STEALTH], 2)]
@@ -243,6 +245,7 @@ class Paladin(FightingClass):
     fighting_style = ["Defense", "Dueling", "Great Weapon Fighting", "Protection"]
     # Subclass at Level 3, officially called "Sacred Oath"
     # Base Rules = Ancients, Devotion, Vengeance
+    subclass_threshold = 3
     class Subclasses(enum.StrEnum):
         ANCIENTS = "Oath of the Ancients"
         DEVOTION = "Oath of Devotion"
@@ -254,6 +257,7 @@ class Paladin(FightingClass):
                 Paladin.Subclasses.DEVOTION: [("Tenets of Devotion", 3), ("Oath Spells", 3), ("Channel Divinity", 3), ("Aura of Devotion", 7), ("Purity of Spirit", 15), ("Holy Nimbus", 20)],
                 Paladin.Subclasses.VENGEANCE: [("Tenets of Vengeance", 3), ("Oath Spells", 3), ("Channel Divinity", 3), ("Relentless Avenger", 7), ("Soul of Vengeance", 15), ("Avenging Angel", 20)]
             }[self]
+    subclasses = list(Subclasses)
     armour_profs = list(ArmourTypes)
     weapon_profs = list(WeaponTypes)
     saving_throw_profs = [Attributes.WIS, Attributes.CHA]
@@ -272,6 +276,7 @@ class Ranger(FightingClass):
     fighting_style = ["Archery", "Defense", "Dueling", "Two-Weapon Fighting"]
     # Subclass at Level 3, officially called "Ranger Conclave"
     # Base Rules = Beast Master, Hunter
+    subclass_threshold = 3
     class Subclasses(enum.StrEnum):
         BEAST_MASTER = "Beast Master"
         HUNTER = "Hunter"
@@ -281,6 +286,7 @@ class Ranger(FightingClass):
                 Ranger.Subclasses.BEAST_MASTER: [("Ranger's Companion", 3), ("Exceptional Training", 7), ("Bestial Fury", 11), ("Share Spells", 15)],
                 Ranger.Subclasses.HUNTER: [("Hunter's Prey", 3), ("Defensive Tactics", 7), ("Multiattack", 11), ("Superior Hunter's Defense", 15)]
             }[self]
+    subclasses = list(Subclasses)
     armour_profs = [ArmourTypes.LIGHT, ArmourTypes.MEDIUM, ArmourTypes.SHIELD]
     weapon_profs = list(WeaponTypes)
     saving_throw_profs = [Attributes.STR, Attributes.DEX]
@@ -295,6 +301,7 @@ class Rogue(CharacterClass):
     hit_die = 8
     # Subclass at Level 3, officially called "Roguish Archtype"
     # Base Rules = Arcane Trickster, Assassin, Thief
+    subclass_threshold = 3
     class Subclasses(enum.StrEnum):
         ARCANE = "Arcane Trickster"
         ASSASSIN = "Assassin"
@@ -306,6 +313,7 @@ class Rogue(CharacterClass):
                 Rogue.Subclasses.ASSASSIN: [("Bonus Proficiencies", 3), ("Assassinate", 3), ("Infiltration Expertise", 9), ("Imposter", 13), ("Death Strike", 17)],
                 Rogue.Subclasses.THIEF: [("Fast Hands", 3), ("Second-Story Work", 3), ("Supreme Sneak", 9), ("Use Magic Device", 13), ("Thief's Reflexes", 17)]
             }[self]
+    subclasses = list(Subclasses)
     armour_profs = [ArmourTypes.LIGHT]
     weapon_profs = [WeaponTypes.SIMPLE_WEAPONS, Weapons.HAND_CROSSBOW, Weapons.LONGSWORD, Weapons.RAPIER, Weapons.SHORTSWORD]
     tool_profs = [Tools.THIEF]
@@ -321,6 +329,7 @@ class Sorcerer(CharacterClass):
     hit_die = 6
     # Subclass at Level 1, officially called "Sorcerous Origin"
     # Base Rules = Draconic Bloodline, Wild Magic
+    subclass_threshold = 1
     class Subclasses(enum.StrEnum):
         DRACONIC = "Draconic Bloodline"
         WILD_MAGIC = "Wild Magic"
@@ -330,6 +339,7 @@ class Sorcerer(CharacterClass):
                 Sorcerer.Subclasses.DRACONIC: [("Dragon Ancestor", 1), ("Draconic Resilience", 1), ("Elemental Affinity", 6), ("Dragon Wings", 14), ("Draconic Presence", 18)], #TODO random pick draconic ancestor
                 Sorcerer.Subclasses.WILD_MAGIC: [("Wild Magic Surge", 1), ("Tides of Chaos", 1), ("Bend Luck", 6), ("Controlled Chaos", 14), ("Spell Bombardment", 18)]
             }[self]
+    subclasses = list(Subclasses)
     weapon_profs = [Weapons.DAGGER, Weapons.DART, Weapons.SLING, Weapons.QUARTERSTAFF, Weapons.LIGHT_CROSSBOW]
     saving_throw_profs = [Attributes.CON, Attributes.CHA]
     skill_profs = [Choice([Skills.ARCANA, Skills.DECEPTION, Skills.INSIGHT, Skills.INTIMIDATION, Skills.PERSUASION, Skills.RELIGION], 2)]
@@ -342,6 +352,7 @@ class Warlock(FightingClass):
     hit_die = 8
     # Subclass at Level 1, officially called "Otherworldly Patron"
     # Base Rules = Archfey, Fiend, Great Old One
+    subclass_threshold = 1
     class Subclasses(enum.StrEnum):
         ARCHFEY = "The Archfey"
         FIEND = "The Fiend"
@@ -353,6 +364,7 @@ class Warlock(FightingClass):
                 Warlock.Subclasses.FIEND: [("Expanded Spell List", 1), ("Dark One's Blessing", 1), ("Dark One's Own Luck", 6), ("Fiendish Resilience", 10), ("Hurl Through Hell", 14)],
                 Warlock.Subclasses.GREAT_OLD_ONE: [("Expanded Spell List", 1), ("Awakened Mind", 1), ("Entropic Ward", 6), ("Thought Shield", 10), ("Create Thrall", 14)]
             }[self]
+    subclasses = list(Subclasses)
     # Fighting Style at Level 3, officially called "Pact Boon"
     fighting_styles = ["Pact of the Blade", "Pact of the Chain", "Pact of the Tome"]
     armour_profs = [ArmourTypes.LIGHT]
@@ -368,6 +380,7 @@ class Wizard(CharacterClass):
     hit_die = 6
     # Sublass at Level 2, officially called "Arcane Tradition"
     # Base Rules = Abjuration, Conjuration, Divination, Enchantment, Evocation, Illusion, Necromancy, Transmutation
+    subclass_threshold = 2
     class Subclasses(enum.StrEnum):
         ABJURATION = "School of Abjuration"
         CONJURATION = "School of Conjuration"
@@ -389,9 +402,25 @@ class Wizard(CharacterClass):
                 Wizard.Subclasses.NECROMANCY: [("Necromancy Savant", 2), ("Grim Harvest", 2), ("Undead Thralls", 6), ("Inured to Undeath", 10), ("Command Undead", 14)],
                 Wizard.Subclasses.TRANSMUTATION: [("Transmutation Savant", 2), ("Minor Alchemy", 2), ("Transmuter's Stone", 6), ("Shapechanger", 10), ("Master Transmuter", 14)]
             }[self]
+    subclasses = list(Subclasses)
     weapon_profs = [Weapons.DAGGER, Weapons.DART, Weapons.SLING, Weapons.QUARTERSTAFF, Weapons.LIGHT_CROSSBOW]
     saving_throw_profs = [Attributes.INT, Attributes.WIS]
     skill_profs = [Choice([Skills.ARCANA, Skills.HISTORY, Skills.INSIGHT, Skills.INVESTIGATION, Skills.MEDICINE, Skills.RELIGION], 2)]
     combat_gear = [Choice([Weapons.QUARTERSTAFF, Weapons.DAGGER])]
     gear = [Choice([Gear.COMPONENT_POUCH, Choice(list(ArcaneFocus))]), Choice([Packs.SCHOLAR, Packs.EXPLORER]), Gear.SPELLBOOK]
     traits = [("Spellcasting", 1), ("Arcane Recovery", 1), ("Spell Mastery", 18), ("Signature Spells", 20)]
+
+all_classes: dict[ClassName,  type[CharacterClass]] = {
+    ClassName.BARBARIAN: Barbarian,
+    ClassName.BARD: Bard,
+    ClassName.CLERIC: Cleric,
+    ClassName.DRUID: Druid,
+    ClassName.FIGHTER: Fighter,
+    ClassName.MONK: Monk,
+    ClassName.PALADIN: Paladin,
+    ClassName.RANGER: Ranger,
+    ClassName.ROGUE: Rogue,
+    ClassName.SORCERER: Sorcerer,
+    ClassName.WARLOCK: Warlock,
+    ClassName.WIZARD: Wizard,
+    }
